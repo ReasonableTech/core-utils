@@ -1,0 +1,40 @@
+.DS_Store
+node_modules
+.turbo
+*.log
+
+# Build outputs
+**/dist/
+**/build/
+coverage
+
+# Bundled config files (temporary build artifacts)
+*.bundled_*.mjs
+*.timestamp-*.mjs
+**/tsup.config.bundled_*.mjs
+**/vitest.config.mts.timestamp-*.mjs
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Editor
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.sw?
+
+# Local tooling
+.tool-versions
+.node-version
+.nvmrc
+.eslintcache
+
+# Test artifacts
+**/playwright-report/
+**/test-results/

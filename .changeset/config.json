@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "ReasonableTech/core-utils" }
+  ],
+  "commit": false,
+  "fixed": [],
+  "linked": [
+    [
+      "@reasonabletech/config-eslint",
+      "@reasonabletech/config-typescript",
+      "@reasonabletech/config-tsup",
+      "@reasonabletech/config-vitest",
+      "@reasonabletech/config-playwright"
+    ]
+  ],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
+}
