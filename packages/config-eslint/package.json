@@ -1,0 +1,93 @@
+{
+  "name": "@reasonabletech/config-eslint",
+  "version": "0.1.0",
+  "description": "Shared ESLint configuration",
+  "keywords": [
+    "reasonabletech",
+    "config",
+    "typescript",
+    "eslint",
+    "linter",
+    "eslint-config",
+    "flat-config",
+    "code-quality"
+  ],
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    },
+    "./next": {
+      "types": "./dist/src/next.d.ts",
+      "import": "./dist/src/next.js"
+    },
+    "./react": {
+      "types": "./dist/src/react.d.ts",
+      "import": "./dist/src/react.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rimraf dist .turbo node_modules coverage .next .webpack out && rm -f tsconfig.tsbuildinfo",
+    "dev": "tsc --watch",
+    "docs:coverage": "tsx ../../../scripts/analysis/check-doc-coverage.ts --html",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "vitest run tests/e2e",
+    "test:integration": "vitest run tests/integration",
+    "test:ui": "vitest --ui",
+    "test:unit": "vitest run tests/unit",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm typecheck && pnpm lint:check && pnpm test && pnpm build"
+  },
+  "author": "Reasonable Tech Company <contact@reasonabletech.co>",
+  "devDependencies": {
+    "@eslint/eslintrc": "3.3.4",
+    "@eslint/js": "10.0.1",
+    "@next/eslint-plugin-next": "16.1.6",
+    "@reasonabletech/config-typescript": "workspace:*",
+    "@types/node": "25.3.0",
+    "@typescript-eslint/utils": "8.56.1",
+    "@vitest/coverage-v8": "4.0.18",
+    "eslint": "10.0.2",
+    "eslint-config-next": "16.1.6",
+    "eslint-config-prettier": "10.1.8",
+    "eslint-plugin-jsdoc": "62.7.0",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-refresh": "0.5.2",
+    "globals": "17.3.0",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.56.1",
+    "vitest": "4.0.18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ReasonableTech/core-utils.git",
+    "directory": "packages/config-eslint"
+  },
+  "bugs": {
+    "url": "https://github.com/ReasonableTech/core-utils/issues"
+  },
+  "homepage": "https://github.com/ReasonableTech/core-utils/tree/main/packages/config-eslint",
+  "files": [
+    "dist",
+    "docs/**/*",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "name": "@reasonabletech/config-playwright",
+  "version": "0.1.0",
+  "description": "Shared Playwright configuration for E2E testing",
+  "keywords": [
+    "reasonabletech",
+    "config",
+    "typescript",
+    "playwright",
+    "e2e",
+    "browser-testing",
+    "test-automation"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./base": {
+      "types": "./dist/src/base.d.ts",
+      "import": "./dist/base.js"
+    },
+    "./cross-app": {
+      "types": "./dist/src/cross-app.d.ts",
+      "import": "./dist/cross-app.js"
+    }
+  },
+  "files": [
+    "dist",
+    "docs/**/*",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup && tsc --emitDeclarationOnly -p tsconfig.build.json",
+    "clean": "rm -rf dist .turbo node_modules tsconfig.tsbuildinfo",
+    "dev": "tsc --watch",
+    "docs:coverage": "tsx ../../../scripts/analysis/check-doc-coverage.ts --html",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "vitest run tests/e2e",
+    "test:integration": "vitest run tests/integration",
+    "test:ui": "vitest --ui",
+    "test:unit": "vitest run tests/unit",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm typecheck && pnpm lint:check && pnpm test && pnpm build"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.11.1",
+    "playwright-lighthouse": "^4.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "@reasonabletech/config-eslint": "workspace:*",
+    "@reasonabletech/config-tsup": "workspace:*",
+    "@reasonabletech/config-typescript": "workspace:*",
+    "@reasonabletech/config-vitest": "workspace:*",
+    "@types/node": "25.3.0",
+    "@vitest/coverage-v8": "4.0.18",
+    "eslint": "10.0.2",
+    "lighthouse": "13.0.3",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
+  },
+  "peerDependencies": {
+    "@playwright/test": "1.55.1",
+    "lighthouse": ">= 10.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "license": "MIT",
+  "author": "Reasonable Tech Company",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ReasonableTech/core-utils.git",
+    "directory": "packages/config-playwright"
+  },
+  "bugs": {
+    "url": "https://github.com/ReasonableTech/core-utils/issues"
+  },
+  "homepage": "https://github.com/ReasonableTech/core-utils/tree/main/packages/config-playwright",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "name": "@reasonabletech/config-typescript",
+  "version": "0.1.0",
+  "description": "Shared TypeScript configuration presets",
+  "keywords": [
+    "reasonabletech",
+    "config",
+    "typescript",
+    "tsconfig",
+    "typescript-config",
+    "typescript-preset",
+    "compiler-options"
+  ],
+  "type": "module",
+  "files": [
+    "lib/**/*.json",
+    "docs/**/*",
+    "examples/**/*"
+  ],
+  "exports": {
+    "./base.json": "./lib/base.json",
+    "./app.json": "./lib/app.json",
+    "./library.json": "./lib/library.json",
+    "./browser-library.json": "./lib/browser-library.json",
+    "./chrome-extension.json": "./lib/chrome-extension.json",
+    "./eslint.json": "./lib/eslint.json",
+    "./nextjs.json": "./lib/nextjs.json",
+    "./platform-library.json": "./lib/platform-library.json",
+    "./react-app.json": "./lib/react-app.json",
+    "./react-library.json": "./lib/react-library.json",
+    "./server.json": "./lib/server.json",
+    "./strict.json": "./lib/strict.json",
+    "./tooling.json": "./lib/tooling.json",
+    "./vscode-extension.json": "./lib/vscode-extension.json",
+    "./docs.json": "./lib/docs.json"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "echo 'No build needed for configuration package'",
+    "clean": "rm -rf .turbo node_modules tsconfig.tsbuildinfo",
+    "lint": "echo \"No lint target for config-only package\"",
+    "lint:check": "echo \"No lint target for config-only package\"",
+    "test": "echo 'No tests for configuration package'",
+    "typecheck": "echo 'No TypeScript files to check in configuration package'",
+    "verify:package": "node ./scripts/verify-pack.mjs",
+    "verify:consumer": "node ./scripts/verify-consumer-smoke.mjs",
+    "verify:release": "node ./scripts/verify-pack.mjs && node ./scripts/verify-consumer-smoke.mjs",
+    "prepublishOnly": "echo 'No TypeScript files to check in configuration package' && echo \"No lint target for config-only package\" && echo 'No tests for configuration package' && echo 'No build needed for configuration package' && node ./scripts/verify-pack.mjs && node ./scripts/verify-consumer-smoke.mjs"
+  },
+  "author": "Reasonable Tech Company",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ReasonableTech/core-utils.git",
+    "directory": "packages/config-typescript"
+  },
+  "bugs": {
+    "url": "https://github.com/ReasonableTech/core-utils/issues"
+  },
+  "homepage": "https://github.com/ReasonableTech/core-utils/tree/main/packages/config-typescript",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  }
+}

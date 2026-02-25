@@ -1,0 +1,100 @@
+{
+  "name": "@reasonabletech/config-vitest",
+  "version": "0.1.0",
+  "description": "Shared Vitest configuration",
+  "keywords": [
+    "reasonabletech",
+    "config",
+    "typescript",
+    "vitest",
+    "testing",
+    "test-config",
+    "coverage",
+    "vite"
+  ],
+  "type": "module",
+  "main": "dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    },
+    "./node": {
+      "types": "./dist/src/node.d.ts",
+      "import": "./dist/src/node.js",
+      "default": "./dist/src/node.js"
+    },
+    "./react": {
+      "types": "./dist/src/react.d.ts",
+      "import": "./dist/src/react.js",
+      "default": "./dist/src/react.js"
+    },
+    "./workspace": {
+      "types": "./dist/src/workspace.d.ts",
+      "import": "./dist/src/workspace.js",
+      "default": "./dist/src/workspace.js"
+    }
+  },
+  "files": [
+    "dist",
+    "docs/**/*",
+    "src"
+  ],
+  "scripts": {
+    "build": "tsup && tsc --emitDeclarationOnly -p tsconfig.build.json",
+    "clean": "rm -rf dist .turbo node_modules tsconfig.tsbuildinfo",
+    "dev": "tsc --watch",
+    "docs:coverage": "tsx ../../../scripts/analysis/check-doc-coverage.ts --html",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "vitest run tests/e2e",
+    "test:integration": "vitest run tests/integration",
+    "test:ui": "vitest --ui",
+    "test:unit": "vitest run tests/unit",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm typecheck && pnpm lint:check && pnpm test && pnpm build"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "5.1.4",
+    "vite": "7.3.1",
+    "vitest": "4.0.18"
+  },
+  "devDependencies": {
+    "@reasonabletech/config-eslint": "workspace:*",
+    "@reasonabletech/config-typescript": "workspace:*",
+    "@types/node": "25.3.0",
+    "@vitest/coverage-v8": "4.0.18",
+    "eslint": "10.0.2",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "4.0.8"
+  },
+  "peerDependencies": {
+    "vite": "7.0.6",
+    "vitest": "4.0.8"
+  },
+  "license": "MIT",
+  "author": "Reasonable Tech Company",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ReasonableTech/core-utils.git",
+    "directory": "packages/config-vitest"
+  },
+  "bugs": {
+    "url": "https://github.com/ReasonableTech/core-utils/issues"
+  },
+  "homepage": "https://github.com/ReasonableTech/core-utils/tree/main/packages/config-vitest",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  }
+}

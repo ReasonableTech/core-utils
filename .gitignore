@@ -7,6 +7,10 @@ node_modules
 **/dist/
 **/build/
 coverage
+**/coverage/
+**/coverage-debug/
+**/generated/
+**/generated/**/lcov-report/
 
 # Bundled config files (temporary build artifacts)
 *.bundled_*.mjs

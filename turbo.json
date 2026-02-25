@@ -10,7 +10,7 @@
       "outputs": []
     },
     "test:coverage": {
-      "outputs": ["coverage/**"]
+      "outputs": ["generated/test-coverage/**"]
     },
     "lint": {
       "dependsOn": ["@reasonabletech/config-eslint#build"]
@@ -24,6 +24,9 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "verify:release": {
+      "outputs": []
     }
   }
 }

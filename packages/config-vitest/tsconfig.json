@@ -1,0 +1,12 @@
+{
+  "extends": "@reasonabletech/config-typescript/tooling.json",
+  "include": ["src/**/*", "tests/**/*", "types*"],
+  "exclude": ["node_modules", "dist", "coverage"],
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDirs": ["src"],
+    "emitDeclarationOnly": false,
+    "rootDir": ".",
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
+  }
+}

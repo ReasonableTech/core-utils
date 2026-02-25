@@ -1,0 +1,13 @@
+{
+  "extends": "@reasonabletech/config-typescript/library.json",
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist", "coverage"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declarationDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "rootDirs": ["./src"],
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
+  }
+}

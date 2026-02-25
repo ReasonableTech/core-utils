@@ -1,0 +1,79 @@
+{
+  "name": "@reasonabletech/config-tsup",
+  "version": "0.1.0",
+  "description": "Shared tsup configuration for ReasonableTech packages",
+  "keywords": [
+    "reasonabletech",
+    "config",
+    "typescript",
+    "tsup",
+    "bundler",
+    "build-config",
+    "esm",
+    "esbuild"
+  ],
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "docs/**/*"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsup && tsc --emitDeclarationOnly -p tsconfig.build.json",
+    "clean": "rm -rf dist .turbo node_modules tsconfig.tsbuildinfo tsconfig.build.tsbuildinfo",
+    "dev": "tsup --watch",
+    "docs:coverage": "tsx ../../../scripts/analysis/check-doc-coverage.ts --html",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "vitest run tests/e2e",
+    "test:integration": "vitest run tests/integration",
+    "test:ui": "vitest --ui",
+    "test:unit": "vitest run tests/unit",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit",
+    "verify:package": "node ./scripts/verify-pack.mjs",
+    "verify:consumer": "node ./scripts/verify-consumer-smoke.mjs",
+    "verify:release": "node ./scripts/verify-pack.mjs && node ./scripts/verify-consumer-smoke.mjs",
+    "prepublishOnly": "tsc --noEmit && eslint . && vitest run && tsup && tsc --emitDeclarationOnly -p tsconfig.build.json && node ./scripts/verify-pack.mjs && node ./scripts/verify-consumer-smoke.mjs"
+  },
+  "devDependencies": {
+    "@reasonabletech/config-eslint": "workspace:*",
+    "@reasonabletech/config-typescript": "workspace:*",
+    "@types/node": "25.3.0",
+    "@vitest/coverage-v8": "4.0.18",
+    "esbuild": "0.27.3",
+    "eslint": "10.0.2",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "4.0.18"
+  },
+  "license": "MIT",
+  "author": "Reasonable Tech Company",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ReasonableTech/core-utils.git",
+    "directory": "packages/config-tsup"
+  },
+  "bugs": {
+    "url": "https://github.com/ReasonableTech/core-utils/issues"
+  },
+  "homepage": "https://github.com/ReasonableTech/core-utils/tree/main/packages/config-tsup",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  }
+}

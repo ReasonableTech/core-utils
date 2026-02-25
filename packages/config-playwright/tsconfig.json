@@ -1,0 +1,11 @@
+{
+  "extends": "@reasonabletech/config-typescript/base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDirs": ["src"],
+    "rootDir": ".",
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
+  },
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist", "coverage"]
+}
