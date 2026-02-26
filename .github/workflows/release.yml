@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
 
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM != '' && vars.TURBO_TEAM || secrets.TURBO_TEAM }}
+  TURBO_TELEMETRY_DISABLED: "1"
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
 
@@ -12,15 +17,55 @@ permissions:
   pull-requests: write
   id-token: write
   statuses: read
+  attestations: write
 
 jobs:
   ci:
     uses: ./.github/workflows/ci.yml
     secrets: inherit
 
+  publish-preflight:
+    name: Publish Preflight
+    needs: ci
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Restore build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            packages/*/dist
+            .turbo
+          key: build-cache-${{ github.sha }}
+          fail-on-cache-miss: false
+
+      - name: Generate Auto Changeset
+        run: node ./scripts/release/create-auto-changeset.mjs
+
+      - name: Ensure release artifacts build
+        run: pnpm build
+
+      - name: Verify release package contents and exports
+        run: node ./scripts/release/release-preflight.mjs
+
   release:
     name: Release
-    needs: ci
+    needs: [ci, publish-preflight]
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     env:
@@ -36,6 +81,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
+          registry-url: https://registry.npmjs.org
 
       - run: pnpm install --frozen-lockfile
 
@@ -70,11 +116,20 @@ jobs:
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
 
+      - name: Pack Release Artifacts
+        if: steps.commit_release.outputs.changed == 'true'
+        run: node ./scripts/release/release-preflight.mjs --pack-dir .release-artifacts/npm --status-file .release-artifacts/release-status.json
+
+      - name: Attest Build Provenance
+        if: steps.commit_release.outputs.changed == 'true'
+        uses: actions/attest-build-provenance@v3
+        with:
+          subject-path: ".release-artifacts/npm/*.tgz"
+
       - name: Publish to NPM
         if: steps.commit_release.outputs.changed == 'true'
-        run: pnpm release
+        run: node ./scripts/release/publish-with-guidance.mjs
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: "true"
 
       - name: Create GitHub Releases
