@@ -5,8 +5,9 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import { intro, log, outro, password } from "@clack/prompts";
-import { promptConfirm, promptOrExit } from "./lib/ui.mjs";
+import { logSubline, promptConfirm, promptOrExit } from "./lib/ui.mjs";
 import { runCommand, runCommandWithTaskLog } from "./lib/shell.mjs";
+import { configureTurboRemoteCache } from "./lib/turbo-remote-cache.mjs";
 
 function checkNodeVersion() {
   const major = Number(process.versions.node.split(".")[0]);
@@ -200,7 +201,19 @@ async function configureGitHubPublishingSecret({ interactive }) {
     return;
   }
 
-  log.success(`Configured GitHub secret NPM_TOKEN for ${repo}.`);}
+  log.success(`Configured GitHub secret NPM_TOKEN for ${repo}.`);
+}
+
+function logFollowUpItems(title, items) {
+  if (items.length === 0) {
+    return;
+  }
+
+  log.step(title);
+  for (const item of items) {
+    logSubline(item);
+  }
+}
 
 async function main() {
   const doctorMode = process.argv.includes("--doctor");
@@ -249,6 +262,14 @@ async function main() {
   if (doctorMode) {
     outro("Doctor check complete.");
     return;
+  }
+
+  if (!skipRemote) {
+    const turboRemoteCache = await configureTurboRemoteCache();
+    logFollowUpItems(
+      "Turbo remote cache follow-up",
+      turboRemoteCache.followUpItems,
+    );
   }
 
   if (!skipInstall) {

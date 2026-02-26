@@ -90,7 +90,7 @@ cd core-utils
 pnpm bootstrap
 ```
 
-`pnpm bootstrap` performs first-run environment checks and installs workspace dependencies. Common commands after that:
+`pnpm bootstrap` performs first-run environment checks, optional auth/remote-cache setup, and workspace installation/verification. Common commands after that:
 
 - `pnpm build` — Build all packages
 - `pnpm test` — Run all test suites

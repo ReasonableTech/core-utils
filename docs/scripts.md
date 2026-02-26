@@ -32,8 +32,11 @@ Runs `scripts/bootstrap/cold-start.mjs`:
 
 1. Checks Node.js version (requires >= 22)
 2. Checks pnpm version (requires 10.8.1)
-3. Installs dependencies
-4. Configures git hooks
+3. Optionally prompts for local npm authentication
+4. Optionally syncs `NPM_TOKEN` to the GitHub repository secret
+5. Optionally configures Turbo remote cache with Vercel (`TURBO_TEAM` in `.env.local`)
+6. Installs dependencies
+7. Runs workspace verification (`pnpm setup:verify`)
 
 Run this after cloning the repository.
 
