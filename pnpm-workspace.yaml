@@ -1,2 +1,5 @@
 packages:
   - packages/*
+strictPeerDependencies: true
+autoInstallPeers: false
+nodeLinker: isolated
