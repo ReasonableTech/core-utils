@@ -31,12 +31,13 @@ pnpm bootstrap
 Runs `scripts/bootstrap/cold-start.mjs`:
 
 1. Checks Node.js version (requires >= 22)
-2. Checks pnpm version (requires 10.8.1)
+2. Checks pnpm version (requires 10.30.2)
 3. Optionally prompts for local npm authentication
-4. Optionally syncs `NPM_TOKEN` to the GitHub repository secret
-5. Optionally configures Turbo remote cache with Vercel (`TURBO_TEAM` in `.env.local`)
-6. Installs dependencies
-7. Runs workspace verification (`pnpm setup:verify`)
+4. Optionally configures Turbo remote cache with Vercel
+5. Syncs Turbo cache settings to GitHub (`TURBO_TEAM` variable and `TURBO_TOKEN` secret)
+6. Prints npm trusted publishing setup guidance (per package)
+7. Installs dependencies
+8. Runs workspace verification (`pnpm setup:verify`)
 
 Run this after cloning the repository.
 
@@ -200,7 +201,7 @@ Runs `scripts/docs/validate-usage-guides.mjs`:
 pnpm release
 ```
 
-Runs `scripts/bootstrap/publish-turnkey.mjs --publish`. This is typically run by CI, not locally.
+Runs `changeset publish`. For brand-new packages, this initial publish is token-based and may require OTP.
 
 ### `pnpm prepare`
 

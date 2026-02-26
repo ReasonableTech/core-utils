@@ -92,16 +92,24 @@ On push to `main`:
 1. **Generate changeset** — If no manual changeset exists, generates one from Conventional Commit messages
 2. **Version packages** — Runs `pnpm version-packages` to bump versions
 3. **Commit versions** — Commits updated package.json files
-4. **Publish** — Runs `pnpm release` to publish to npm
+4. **Pack release artifacts** — Creates package tarballs from release candidates
+5. **Attest provenance** — Attaches GitHub build provenance attestations to tarballs
+6. **Publish** — Publishes via npm trusted publishing (OIDC, no long-lived npm token)
 
 ### Provenance
 
-Packages are published with npm provenance, proving they were built by GitHub Actions:
+The release workflow records provenance in two places:
+
+1. npm provenance (`NPM_CONFIG_PROVENANCE=true`)
+2. GitHub attestations (`actions/attest-build-provenance`)
+
+The workflow includes the required permissions:
 
 ```json
 {
   "permissions": {
-    "id-token": "write"
+    "id-token": "write",
+    "attestations": "write"
   }
 }
 ```
@@ -110,17 +118,25 @@ Consumers can verify package origin on npmjs.com.
 
 ---
 
-## Required Secrets
+## Required Repository Configuration
 
-| Secret | Purpose |
-|--------|---------|
-| `NPM_TOKEN` | npm automation token with publish rights for `@reasonabletech/*` |
+| Key | Type | Purpose |
+|-----|------|---------|
+| `TURBO_TOKEN` | Secret | Turbo remote cache token for CI |
+| `TURBO_TEAM` | Variable (preferred) or Secret | Turbo team slug for remote cache |
 
-### Setting Up NPM_TOKEN
+## Trusted Publishing Setup (npm)
 
-1. Generate token at npmjs.com → Access Tokens → Generate New Token
-2. Select "Automation" token type
-3. Add to repository: Settings → Secrets → Actions → New repository secret
+Trusted publishing must be configured per package, and only after that package already exists on npm.
+
+1. For each brand-new package, do one initial token-based publish to create it on npm.
+2. On npmjs.com, open that package and go to `Settings > Trusted Publisher`.
+3. Select GitHub Actions and configure:
+4. `Organization or user`: `ReasonableTech`
+5. `Repository`: `core-utils`
+6. `Workflow filename`: `release.yml`
+7. `Environment`: leave blank unless GitHub Actions enforces one
+8. Save and rerun release; publish uses OIDC from then on.
 
 ---
 

@@ -11,6 +11,8 @@ lint → typecheck → test → build → verify:release
   → auto-changeset (or skip if manual exists)
   → version-packages
   → commit version bumps
+  → pack npm artifacts
+  → attest build provenance
   → publish to npm
   → create GitHub Releases
 ```
@@ -88,9 +90,23 @@ All packages except `@reasonabletech/utils` are in a **linked release group** �
 
 `@reasonabletech/utils` is versioned independently.
 
-## Required Secrets
+## Required Repository Configuration
 
-- `NPM_TOKEN`: NPM automation token with publish rights for `@reasonabletech/*`. Set via `pnpm bootstrap`.
+- `TURBO_TOKEN` (GitHub Secret): Turbo remote cache token for CI.
+- `TURBO_TEAM` (GitHub Variable preferred, Secret fallback): Turbo team slug for CI remote cache.
+
+## Trusted Publishing Setup
+
+Trusted publishing is configured per package only after that package exists on npm.
+
+1. For each brand-new package, do one token-based publish to create the package on npm.
+2. On npmjs.com, open the package and go to `Settings > Trusted Publisher`.
+3. Configure GitHub Actions trusted publishing with:
+4. `Organization or user`: `ReasonableTech`
+5. `Repository`: `core-utils`
+6. `Workflow filename`: `release.yml`
+7. `Environment`: leave blank unless your workflow enforces one
+8. Save and rerun release; publish then uses OIDC.
 
 ## Provenance
 
