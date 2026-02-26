@@ -91,7 +91,7 @@ async function main() {
     execFileSync("git", ["push"], { stdio: "inherit" });
   }
 
-  await runOrExit("Publishing release (pnpm release)", "pnpm", ["release"]);
+  await runOrExit("Publishing release (changeset publish)", "pnpm", ["exec", "changeset", "publish"]);
 
   outro("Publish complete.");
 }

@@ -1,6 +1,7 @@
 ---
 "@reasonabletech/config-typescript": patch
 "@reasonabletech/config-tsup": patch
+"@reasonabletech/utils": patch
 ---
 
 De-duplicate TypeScript preset packaging by making `lib/*.json` the only canonical source and removing redundant top-level wrapper files. Documentation and examples were also updated to use valid `.json` preset paths and the currently supported preset surface.

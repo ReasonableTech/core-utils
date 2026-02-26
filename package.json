@@ -19,7 +19,8 @@
     "setup:verify": "pnpm turbo run typecheck lint build test --continue && pnpm verify:release",
     "bootstrap:doctor": "node ./scripts/bootstrap/cold-start.mjs --doctor",
     "verify:release": "pnpm turbo run verify:release --filter=@reasonabletech/config-typescript --filter=@reasonabletech/config-tsup",
-    "release": "node ./scripts/bootstrap/publish-turnkey.mjs --publish",
+    "version-packages": "changeset version",
+    "release": "changeset publish",
     "prepare": "git config core.hooksPath .githooks"
   },
   "devDependencies": {
