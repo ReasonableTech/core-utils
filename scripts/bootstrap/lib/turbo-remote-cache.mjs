@@ -1,9 +1,10 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { stripVTControlCharacters } from "node:util";
 import { log, select, text } from "@clack/prompts";
 import {
   runShellCommand,
-  runShellCommandWithTaskLog,
+  runShellCommandWithTask,
   summarizeOutputLine,
 } from "./shell.mjs";
 import { logSubline, promptConfirm, promptOrExit } from "./ui.mjs";
@@ -11,6 +12,8 @@ import { logSubline, promptConfirm, promptOrExit } from "./ui.mjs";
 const REMOTE_CACHE_DOCS_URL =
   "https://turborepo.dev/docs/core-concepts/remote-caching";
 const VERCEL_LOGIN_COMMAND = "pnpm exec vercel login --no-color";
+const VERCEL_FORMAT_OPTION_UNSUPPORTED =
+  /unknown(?:\s+or\s+unexpected)?\s+option:?\s*['"]?--format['"]?/iu;
 
 export function parseEnvFile(path) {
   const map = new Map();
@@ -96,6 +99,58 @@ function parseJsonOutput(raw) {
   }
 }
 
+function isFormatOptionUnsupported(result) {
+  return VERCEL_FORMAT_OPTION_UNSUPPORTED.test(`${result.stderr}\n${result.stdout}`);
+}
+
+function parseWhoamiTextOutput(raw) {
+  const lines = raw
+    .split(/\r?\n/u)
+    .map((line) => stripVTControlCharacters(line).trim())
+    .filter((line) => {
+      return line.length > 0 && !line.startsWith("Vercel CLI");
+    });
+  return lines.length > 0 ? lines[lines.length - 1] : undefined;
+}
+
+function parseTeamsTextOutput(raw) {
+  const teams = [];
+  const seen = new Set();
+  const lines = raw.split(/\r?\n/u);
+
+  for (const line of lines) {
+    const trimmed = stripVTControlCharacters(line).trim();
+    if (trimmed.length === 0) {
+      continue;
+    }
+    if (trimmed.startsWith("Vercel CLI") || trimmed.startsWith("Fetching")) {
+      continue;
+    }
+    if (trimmed.startsWith("id ") || trimmed.includes("email / name")) {
+      continue;
+    }
+
+    const normalizedLine = trimmed
+      .replace(/^✔\s+/u, "")
+      .replace(/^[>\-\u2022*]\s+/u, "");
+    const [candidateSlug, candidateName] = normalizedLine.split(/\s{2,}/u);
+    const slug = normalizeTeamSlug(candidateSlug ?? "");
+    if (slug.length === 0 || seen.has(slug)) {
+      continue;
+    }
+    seen.add(slug);
+    teams.push({
+      slug,
+      name:
+        typeof candidateName === "string" && candidateName.trim().length > 0
+          ? candidateName.trim()
+          : slug,
+    });
+  }
+
+  return teams;
+}
+
 export function normalizeTeamSlug(value) {
   return value
     .trim()
@@ -149,6 +204,19 @@ export function inferTurboScope(teams, existingTeamValue) {
 export function getVercelWhoAmI(runShellCommandFn = runShellCommand) {
   const result = runShellCommandFn("pnpm exec vercel whoami --format json");
   if (!result.ok) {
+    if (isFormatOptionUnsupported(result)) {
+      const fallback = runShellCommandFn("pnpm exec vercel whoami --no-color");
+      if (!fallback.ok) {
+        return {
+          ok: false,
+          reason: summarizeOutputLine(fallback),
+        };
+      }
+      return {
+        ok: true,
+        username: parseWhoamiTextOutput(fallback.stdout),
+      };
+    }
     return {
       ok: false,
       reason: summarizeOutputLine(result),
@@ -179,6 +247,20 @@ export function getVercelWhoAmI(runShellCommandFn = runShellCommand) {
 export function getVercelTeams(runShellCommandFn = runShellCommand) {
   const result = runShellCommandFn("pnpm exec vercel teams list --format json");
   if (!result.ok) {
+    if (isFormatOptionUnsupported(result)) {
+      const fallback = runShellCommandFn("pnpm exec vercel teams list --no-color");
+      if (!fallback.ok) {
+        return {
+          ok: false,
+          teams: [],
+          reason: summarizeOutputLine(fallback),
+        };
+      }
+      return {
+        ok: true,
+        teams: parseTeamsTextOutput(fallback.stdout),
+      };
+    }
     return {
       ok: false,
       teams: [],
@@ -239,7 +321,7 @@ async function ensureVercelAuth(runtime) {
     return identity;
   }
 
-  const loggedIn = await runtime.runShellCommandWithTaskLogFn(
+  const loggedIn = await runtime.runShellCommandWithTaskFn(
     "Authenticating Vercel CLI",
     VERCEL_LOGIN_COMMAND,
   );
@@ -252,23 +334,28 @@ async function ensureVercelAuth(runtime) {
 }
 
 export async function configureTurboRemoteCache(options = {}) {
+  const runShellCommandFn = options.runShellCommandFn ?? runShellCommand;
+  const turboCliCommand = options.turboCliCommand ?? "pnpm exec turbo";
+
   const runtime = {
     envFilePath: options.envFilePath ?? resolve(process.cwd(), ".env.local"),
     verifyCommand:
       options.verifyCommand ??
-      "pnpm turbo run build --filter=@reasonabletech/utils --ui=stream",
+      `${turboCliCommand} run build --filter=@reasonabletech/utils --ui=stream`,
+    turboCliCommand,
     logApi: options.logApi ?? log,
     logSublineFn: options.logSublineFn ?? logSubline,
     promptConfirmFn: options.promptConfirmFn ?? promptConfirm,
     promptOrExitFn: options.promptOrExitFn ?? promptOrExit,
-    runShellCommandFn: options.runShellCommandFn ?? runShellCommand,
-    runShellCommandWithTaskLogFn:
-      options.runShellCommandWithTaskLogFn ?? runShellCommandWithTaskLog,
+    runShellCommandFn,
+    runShellCommandWithTaskFn:
+      options.runShellCommandWithTaskFn ?? runShellCommandWithTask,
   };
 
   const followUpItems = [];
   const values = parseEnvFile(runtime.envFilePath);
   const existingTeam = stripWrappingQuotes(values.get("TURBO_TEAM") ?? "");
+  let detectedUsername = "";
 
   const shouldPrepare = await runtime.promptConfirmFn(
     "Configure Turbo remote cache automatically now?",
@@ -285,7 +372,7 @@ export async function configureTurboRemoteCache(options = {}) {
   let selectedScope = null;
   const identity = await ensureVercelAuth(runtime);
   if (identity.ok) {
-    const detectedUsername = identity.username ?? "";
+    detectedUsername = identity.username ?? "";
     if (detectedUsername.length > 0) {
       runtime.logSublineFn(`Detected Vercel account: ${detectedUsername}`);
     } else {
@@ -331,6 +418,19 @@ export async function configureTurboRemoteCache(options = {}) {
     }
   }
 
+  if (selectedScope == null && detectedUsername.length > 0) {
+    const normalizedAccountScope = normalizeTeamSlug(detectedUsername);
+    if (normalizedAccountScope.length > 0) {
+      const useAccountScope = await runtime.promptConfirmFn(
+        `Use Vercel account \`${normalizedAccountScope}\` for Turbo link?`,
+        true,
+      );
+      if (useAccountScope) {
+        selectedScope = normalizedAccountScope;
+      }
+    }
+  }
+
   if (selectedScope == null) {
     const manualScope = await runtime.promptOrExitFn(
       text({
@@ -349,27 +449,27 @@ export async function configureTurboRemoteCache(options = {}) {
 
   const loginCommand =
     selectedScope != null
-      ? `pnpm dlx turbo login --sso-team ${selectedScope} --ui=stream`
-      : "pnpm dlx turbo login --ui=stream";
+      ? `${runtime.turboCliCommand} login --sso-team ${selectedScope} --ui=stream`
+      : `${runtime.turboCliCommand} login --ui=stream`;
   const linkCommand =
     selectedScope != null
-      ? `pnpm dlx turbo link --scope ${selectedScope} --yes --ui=stream`
-      : "pnpm dlx turbo link --yes --ui=stream";
+      ? `${runtime.turboCliCommand} link --scope ${selectedScope} --yes --ui=stream`
+      : `${runtime.turboCliCommand} link --yes --ui=stream`;
 
   runtime.logSublineFn("Attempting Turbo link...");
-  let linked = await runtime.runShellCommandWithTaskLogFn(
-    "Turbo remote cache: link workspace",
+  let linked = await runtime.runShellCommandWithTaskFn(
+    "Turbo remote cache link workspace",
     linkCommand,
   );
   if (!linked) {
     runtime.logSublineFn("Turbo link requires authentication. Starting login...");
-    const loggedIn = await runtime.runShellCommandWithTaskLogFn(
-      "Turbo remote cache: authenticate",
+    const loggedIn = await runtime.runShellCommandWithTaskFn(
+      "Turbo remote cache authenticate",
       loginCommand,
     );
     if (loggedIn) {
-      linked = await runtime.runShellCommandWithTaskLogFn(
-        "Turbo remote cache: retry link",
+      linked = await runtime.runShellCommandWithTaskFn(
+        "Turbo remote cache retry link",
         linkCommand,
       );
     }
@@ -392,8 +492,8 @@ export async function configureTurboRemoteCache(options = {}) {
   }
   runtime.logApi.success("Turbo remote cache linked");
 
-  const verified = await runtime.runShellCommandWithTaskLogFn(
-    "Turbo remote cache: validate with build",
+  const verified = await runtime.runShellCommandWithTaskFn(
+    "Turbo remote cache validate with build",
     runtime.verifyCommand,
   );
   if (verified) {

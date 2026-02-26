@@ -6,22 +6,26 @@ import { homedir } from "node:os";
 import path from "node:path";
 import { intro, log, outro, password } from "@clack/prompts";
 import { logSubline, promptConfirm, promptOrExit } from "./lib/ui.mjs";
-import { runCommand, runCommandWithTaskLog } from "./lib/shell.mjs";
+import { runCommand, runCommandWithTask } from "./lib/shell.mjs";
 import { configureTurboRemoteCache } from "./lib/turbo-remote-cache.mjs";
 
 function checkNodeVersion() {
   const major = Number(process.versions.node.split(".")[0]);
   if (Number.isNaN(major) || major < 22) {
-    return { ok: false, detail: `Node.js ${process.versions.node} (requires >= 22)` };
+    return { ok: false, detail: `${process.versions.node} (requires >= 22)` };
   }
-  return { ok: true, detail: `Node.js ${process.versions.node}` };
+  return { ok: true, detail: process.versions.node };
 }
 
 function checkCli(command, versionArg = "--version") {
   const result = runCommand(command, [versionArg]);
+  const singleLineOutput = result.stdout
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .find((line) => line.length > 0);
   return {
     ok: result.status === 0,
-    detail: result.status === 0 ? result.stdout : `${command} not found`,
+    detail: result.status === 0 ? (singleLineOutput ?? result.stdout) : `${command} not found`,
   };
 }
 
@@ -99,7 +103,6 @@ function createLoginEnv() {
 async function ensureLocalNpmAuth({ interactive }) {
   const current = runCommand("pnpm", ["whoami"]);
   if (current.status === 0) {
-    log.success(`NPM auth ready: ${current.stdout}`);
     return true;
   }
 
@@ -228,7 +231,7 @@ async function main() {
   const checks = [
     { name: "Node.js", ...checkNodeVersion() },
     { name: "PNPM", ...checkCli("pnpm") },
-    { name: "NPM auth", ...(() => {
+    { name: "NPM Auth", ...(() => {
       const result = runCommand("pnpm", ["whoami"]);
       return {
         ok: result.status === 0,
@@ -264,16 +267,8 @@ async function main() {
     return;
   }
 
-  if (!skipRemote) {
-    const turboRemoteCache = await configureTurboRemoteCache();
-    logFollowUpItems(
-      "Turbo remote cache follow-up",
-      turboRemoteCache.followUpItems,
-    );
-  }
-
   if (!skipInstall) {
-    const install = await runCommandWithTaskLog(
+    const install = await runCommandWithTask(
       "Installing workspace dependencies (pnpm install --frozen-lockfile)",
       "pnpm",
       ["install", "--frozen-lockfile"],
@@ -283,8 +278,16 @@ async function main() {
     }
   }
 
+  if (!skipRemote) {
+    const turboRemoteCache = await configureTurboRemoteCache();
+    logFollowUpItems(
+      "Turbo remote cache follow-up",
+      turboRemoteCache.followUpItems,
+    );
+  }
+
   if (!skipVerify) {
-    const verify = await runCommandWithTaskLog(
+    const verify = await runCommandWithTask(
       "Running workspace verification (pnpm setup:verify)",
       "pnpm",
       ["setup:verify"],

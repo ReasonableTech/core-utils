@@ -6,6 +6,8 @@ import { join } from "node:path";
 import { test } from "node:test";
 import {
   configureTurboRemoteCache,
+  getVercelTeams,
+  getVercelWhoAmI,
   inferTurboScope,
   normalizeTeamSlug,
   normalizeVercelTeamEntry,
@@ -23,21 +25,82 @@ function createLogStub() {
 }
 
 test("normalizeTeamSlug strips wrappers, host, and @ prefix", () => {
-  assert.equal(normalizeTeamSlug('"@reasonabletech"'), "reasonabletech");
-  assert.equal(normalizeTeamSlug("https://vercel.com/acme-team"), "acme-team");
-  assert.equal(normalizeTeamSlug("vercel.com/sample"), "sample");
+  assert.equal(normalizeTeamSlug('"@example-team"'), "example-team");
+  assert.equal(normalizeTeamSlug("https://vercel.com/demo-team"), "demo-team");
+  assert.equal(normalizeTeamSlug("vercel.com/sandbox"), "sandbox");
 });
 
 test("normalizeVercelTeamEntry handles slug and teamSlug shapes", () => {
   assert.deepEqual(
-    normalizeVercelTeamEntry({ slug: "@reasonabletech", name: "ReasonableTech" }),
-    { slug: "reasonabletech", name: "ReasonableTech" },
+    normalizeVercelTeamEntry({ slug: "@example-team", name: "Example Team" }),
+    { slug: "example-team", name: "Example Team" },
   );
   assert.deepEqual(
-    normalizeVercelTeamEntry({ teamSlug: "acme", name: "Acme" }),
-    { slug: "acme", name: "Acme" },
+    normalizeVercelTeamEntry({ teamSlug: "demo", name: "Demo Team" }),
+    { slug: "demo", name: "Demo Team" },
   );
   assert.equal(normalizeVercelTeamEntry({ name: "Missing slug" }), null);
+});
+
+test("getVercelWhoAmI supports modern plain-text CLI output", () => {
+  const result = getVercelWhoAmI((command) => {
+    if (command.includes("whoami --format json")) {
+      return {
+        ok: false,
+        status: 1,
+        stdout: "Vercel CLI 44.4.1",
+        stderr: "Error: unknown or unexpected option: --format",
+      };
+    }
+    if (command.includes("whoami --no-color")) {
+      return {
+        ok: true,
+        status: 0,
+        stdout: "Vercel CLI 44.4.1\nexample-user",
+        stderr: "",
+      };
+    }
+    return { ok: false, status: 1, stdout: "", stderr: "unexpected command" };
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(result.username, "example-user");
+});
+
+test("getVercelTeams supports modern table CLI output", () => {
+  const result = getVercelTeams((command) => {
+    if (command.includes("teams list --format json")) {
+      return {
+        ok: false,
+        status: 1,
+        stdout: "Vercel CLI 44.4.1",
+        stderr: "Error: unknown or unexpected option: --format",
+      };
+    }
+    if (command.includes("teams list --no-color")) {
+      return {
+        ok: true,
+        status: 0,
+        stdout:
+          "Vercel CLI 44.4.1\n" +
+          "Fetching teams\n" +
+          "Fetching user information\n\n" +
+          "  id                       email / name\n" +
+          "✔ example-projects         Example Projects\n" +
+          "  sandbox-tools            Sandbox Tools\n" +
+          "  demo-team                Demo Team\n",
+        stderr: "",
+      };
+    }
+    return { ok: false, status: 1, stdout: "", stderr: "unexpected command" };
+  });
+
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.teams, [
+    { slug: "example-projects", name: "Example Projects" },
+    { slug: "sandbox-tools", name: "Sandbox Tools" },
+    { slug: "demo-team", name: "Demo Team" },
+  ]);
 });
 
 test("inferTurboScope prefers existing, then single team, and otherwise requires selection", () => {
@@ -59,7 +122,7 @@ test("inferTurboScope prefers existing, then single team, and otherwise requires
     inferTurboScope(
       [
         { slug: "other", name: "Other" },
-        { slug: "reasonabletech-internal", name: "RT" },
+        { slug: "demo-internal", name: "Demo Internal" },
       ],
       "",
     ),
@@ -90,6 +153,19 @@ test("configureTurboRemoteCache prompts vercel auth and retries identity when mi
   const confirmAnswers = [true, true, true];
   const taskCommands = [];
   let whoamiChecks = 0;
+  const runTaskCommand = async (_title, command) => {
+    taskCommands.push(command);
+    if (command.includes("vercel login --no-color")) {
+      return true;
+    }
+    if (command.includes("turbo link")) {
+      return true;
+    }
+    if (command.includes("turbo run build")) {
+      return true;
+    }
+    return false;
+  };
 
   try {
     const result = await configureTurboRemoteCache({
@@ -121,19 +197,7 @@ test("configureTurboRemoteCache prompts vercel auth and retries identity when mi
         }
         return { ok: false, status: 1, stdout: "", stderr: "unexpected command" };
       },
-      runShellCommandWithTaskLogFn: async (_title, command) => {
-        taskCommands.push(command);
-        if (command.includes("vercel login --no-color")) {
-          return true;
-        }
-        if (command.includes("turbo link")) {
-          return true;
-        }
-        if (command.includes("turbo run build")) {
-          return true;
-        }
-        return false;
-      },
+      runShellCommandWithTaskFn: runTaskCommand,
     });
 
     assert.equal(result.linked, true);
@@ -157,6 +221,20 @@ test("configureTurboRemoteCache links after turbo login retry and persists TURBO
   const commandCalls = [];
   const confirmAnswers = [true, true];
   let linkAttempts = 0;
+  const runTaskCommand = async (_title, command) => {
+    taskCommands.push(command);
+    if (command.includes("turbo link")) {
+      linkAttempts += 1;
+      return linkAttempts > 1;
+    }
+    if (command.includes("turbo login")) {
+      return true;
+    }
+    if (command.includes("turbo run build")) {
+      return true;
+    }
+    return false;
+  };
 
   try {
     const result = await configureTurboRemoteCache({
@@ -185,20 +263,7 @@ test("configureTurboRemoteCache links after turbo login retry and persists TURBO
         }
         return { ok: false, status: 1, stdout: "", stderr: "unexpected command" };
       },
-      runShellCommandWithTaskLogFn: async (_title, command) => {
-        taskCommands.push(command);
-        if (command.includes("turbo link")) {
-          linkAttempts += 1;
-          return linkAttempts > 1;
-        }
-        if (command.includes("turbo login")) {
-          return true;
-        }
-        if (command.includes("turbo run build")) {
-          return true;
-        }
-        return false;
-      },
+      runShellCommandWithTaskFn: runTaskCommand,
     });
 
     assert.equal(result.linked, true);
@@ -216,10 +281,21 @@ test("configureTurboRemoteCache links after turbo login retry and persists TURBO
   }
 });
 
-test("configureTurboRemoteCache returns manual follow-up items when link setup fails", async () => {
+test("configureTurboRemoteCache uses local turbo via pnpm exec when available", async () => {
   const root = await mkdtemp(join(tmpdir(), "core-utils-bootstrap-"));
   const envFilePath = join(root, ".env.local");
+  const taskCommands = [];
   const confirmAnswers = [true, true];
+  const runTaskCommand = async (_title, command) => {
+    taskCommands.push(command);
+    if (command.includes("turbo link")) {
+      return true;
+    }
+    if (command.includes("turbo run build")) {
+      return true;
+    }
+    return false;
+  };
 
   try {
     const result = await configureTurboRemoteCache({
@@ -247,15 +323,66 @@ test("configureTurboRemoteCache returns manual follow-up items when link setup f
         }
         return { ok: false, status: 1, stdout: "", stderr: "unexpected command" };
       },
-      runShellCommandWithTaskLogFn: async (_title, command) => {
-        if (command.includes("turbo link")) {
-          return false;
+      runShellCommandWithTaskFn: runTaskCommand,
+    });
+
+    assert.equal(result.linked, true);
+    assert.equal(
+      taskCommands.some((command) =>
+        command.includes("pnpm exec turbo link --scope team-a --yes --ui=stream"),
+      ),
+      true,
+    );
+    assert.equal(
+      taskCommands.some((command) => command.includes("pnpm dlx turbo link")),
+      false,
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("configureTurboRemoteCache returns manual follow-up items when link setup fails", async () => {
+  const root = await mkdtemp(join(tmpdir(), "core-utils-bootstrap-"));
+  const envFilePath = join(root, ".env.local");
+  const confirmAnswers = [true, true];
+  const runTaskCommand = async (_title, command) => {
+    if (command.includes("turbo link")) {
+      return false;
+    }
+    if (command.includes("turbo login")) {
+      return false;
+    }
+    return false;
+  };
+
+  try {
+    const result = await configureTurboRemoteCache({
+      envFilePath,
+      logApi: createLogStub(),
+      logSublineFn: () => {},
+      promptConfirmFn: async () => confirmAnswers.shift() ?? true,
+      promptOrExitFn: async (value) => value,
+      runShellCommandFn: (command) => {
+        if (command.includes("vercel whoami")) {
+          return {
+            ok: true,
+            status: 0,
+            stdout: '{"username":"tester"}',
+            stderr: "",
+          };
         }
-        if (command.includes("turbo login")) {
-          return false;
+        if (command.includes("vercel teams list")) {
+          return {
+            ok: true,
+            status: 0,
+            stdout: '[{"slug":"team-a","name":"Team A"}]',
+            stderr: "",
+          };
         }
-        return false;
+        return { ok: false, status: 1, stdout: "", stderr: "unexpected command" };
       },
+      runShellCommandWithTaskFn: runTaskCommand,
     });
 
     assert.equal(result.linked, false);
@@ -275,6 +402,15 @@ test("configureTurboRemoteCache adds validation follow-up when verify command fa
   const root = await mkdtemp(join(tmpdir(), "core-utils-bootstrap-"));
   const envFilePath = join(root, ".env.local");
   const confirmAnswers = [true, true];
+  const runTaskCommand = async (_title, command) => {
+    if (command.includes("turbo link")) {
+      return true;
+    }
+    if (command.includes("turbo run build")) {
+      return false;
+    }
+    return false;
+  };
 
   try {
     const result = await configureTurboRemoteCache({
@@ -302,15 +438,7 @@ test("configureTurboRemoteCache adds validation follow-up when verify command fa
         }
         return { ok: false, status: 1, stdout: "", stderr: "unexpected command" };
       },
-      runShellCommandWithTaskLogFn: async (_title, command) => {
-        if (command.includes("turbo link")) {
-          return true;
-        }
-        if (command.includes("turbo run build")) {
-          return false;
-        }
-        return false;
-      },
+      runShellCommandWithTaskFn: runTaskCommand,
     });
 
     assert.equal(result.linked, true);
