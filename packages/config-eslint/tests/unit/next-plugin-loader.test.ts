@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   invalidTypescriptConfig,
   validCoreWebVitalsConfig,
@@ -7,14 +7,30 @@ import {
 import { createRequireFromBaseMock } from "../helpers/next/require-from-base.js";
 import { createNodeModuleMock } from "../mocks/node-module.js";
 
+const previousNodeEnv = process.env.NODE_ENV;
+
 describe("Next.js plugin loader", () => {
   beforeEach(() => {
     vi.resetModules();
+    process.env.NODE_ENV = "development";
   });
 
   afterEach(() => {
+    if (previousNodeEnv === undefined) {
+      delete process.env.NODE_ENV;
+    } else {
+      process.env.NODE_ENV = previousNodeEnv;
+    }
     vi.restoreAllMocks();
     vi.resetModules();
+  });
+
+  afterAll(() => {
+    if (previousNodeEnv === undefined) {
+      delete process.env.NODE_ENV;
+    } else {
+      process.env.NODE_ENV = previousNodeEnv;
+    }
   });
 
   it("loads valid Next.js flat config arrays and normalizes parser options", async () => {

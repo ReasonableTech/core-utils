@@ -11,7 +11,9 @@
  * mocking node:module which affects the entire test file.
  */
 
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+const previousNodeEnv = process.env.NODE_ENV;
 
 /**
  * Capture the real createRequire before vi.mock replaces the module.
@@ -31,8 +33,26 @@ vi.mock("node:module", () => ({
   createRequire: mockCreateRequire,
 }));
 
+beforeEach(() => {
+  process.env.NODE_ENV = "development";
+});
+
 afterEach(() => {
+  vi.restoreAllMocks();
+  if (previousNodeEnv === undefined) {
+    delete process.env.NODE_ENV;
+  } else {
+    process.env.NODE_ENV = previousNodeEnv;
+  }
   mockCreateRequire.mockImplementation(realCreateRequire);
+});
+
+afterAll(() => {
+  if (previousNodeEnv === undefined) {
+    delete process.env.NODE_ENV;
+  } else {
+    process.env.NODE_ENV = previousNodeEnv;
+  }
 });
 
 describe("loadNextjsConfigs fallback scenarios", () => {

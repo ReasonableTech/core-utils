@@ -50,10 +50,12 @@ export const loadNextjsConfigs = (projectDir: string): Linter.Config[] => {
       removeProjectParserOption,
     );
   } catch (error) {
-    console.warn(
-      "Next.js ESLint config not available, using base React setup",
-      error instanceof Error ? error.message : error,
-    );
+    if (process.env.NODE_ENV !== "test") {
+      console.warn(
+        "Next.js ESLint config not available, using base React setup",
+        error instanceof Error ? error.message : error,
+      );
+    }
     return [];
   }
 };
