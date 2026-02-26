@@ -13,7 +13,6 @@ export default {
         "config-eslint",
         "config-playwright",
         "utils",
-        "repo",
       ],
     ],
     // Allow empty scope for general changes
