@@ -253,6 +253,30 @@ function applyLinkedGroupRules(releaseTypes, packageCommits) {
   return finalTypes;
 }
 
+function parseChangesetFrontmatter(content) {
+  const match = content.match(/^---\n([\s\S]*?)\n---/u);
+  if (!match) {
+    return [];
+  }
+  return match[1]
+    .split("\n")
+    .map((line) => line.match(/^"([^"]+)":/u))
+    .filter(Boolean)
+    .map((m) => m[1]);
+}
+
+function readExistingChangesetCoverage() {
+  const coverage = new Map();
+  for (const name of listExistingChangesetFiles()) {
+    const filePath = path.join(".changeset", name);
+    const content = readFileSync(filePath, "utf8");
+    for (const pkg of parseChangesetFrontmatter(content)) {
+      coverage.set(pkg, filePath);
+    }
+  }
+  return coverage;
+}
+
 function writeAutoChangesets(finalReleaseTypes, packageCommits) {
   if (finalReleaseTypes.size === 0) {
     return [];
@@ -305,25 +329,51 @@ function main() {
     return;
   }
 
-  const existingChangesets = listExistingChangesetFiles();
-  if (existingChangesets.length > 0) {
-    console.log(
-      `Auto changeset: existing changeset files detected (${existingChangesets.length}), skipping auto-generation.`,
-    );
-    return;
-  }
-
+  // Compute commits and release levels for all changed packages up front so that
+  // linked-group promotion works correctly regardless of manual-changeset coverage.
   const { releaseTypes, packageCommits } = computeBaseReleaseTypes(changedPackages, commitMessages);
   const finalReleaseTypes = applyLinkedGroupRules(releaseTypes, packageCommits);
-  const created = writeAutoChangesets(finalReleaseTypes, packageCommits);
 
-  if (created.length === 0) {
+  const existingCoverage = readExistingChangesetCoverage(); // Map<packageName, filePath>
+
+  // Auto-generate changeset files only for packages not already covered manually.
+  const uncoveredReleaseTypes = new Map(
+    [...finalReleaseTypes].filter(([name]) => !existingCoverage.has(name)),
+  );
+  const created = writeAutoChangesets(uncoveredReleaseTypes, packageCommits);
+
+  if (created.length === 0 && existingCoverage.size === 0) {
     console.log("Auto changeset: nothing to release.");
     return;
   }
 
   for (const { changesetPath, packageName, level } of created) {
     console.log(`Auto changeset: created ${changesetPath} for ${packageName}@${level}`);
+  }
+
+  // Append scoped commit subjects to manual changeset files so consumers get
+  // full context without having to copy commit lines by hand.
+  for (const pkg of changedPackages) {
+    const filePath = existingCoverage.get(pkg.name);
+    if (filePath === undefined) {
+      continue;
+    }
+
+    const commits = (packageCommits.get(pkg.name) ?? []).filter(
+      (s) => !s.startsWith("Bumped as part of"),
+    );
+    if (commits.length === 0) {
+      continue;
+    }
+
+    const existing = readFileSync(filePath, "utf8");
+    if (existing.includes("### Commits")) {
+      continue; // Already appended; skip to stay idempotent.
+    }
+
+    const appendix = `\n### Commits\n\n${commits.map((s) => `- ${s}`).join("\n")}\n`;
+    writeFileSync(filePath, existing.trimEnd() + "\n" + appendix);
+    console.log(`Auto changeset: appended ${commits.length} commit(s) to ${filePath}`);
   }
 }
 

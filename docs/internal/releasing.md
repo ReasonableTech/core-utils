@@ -66,7 +66,7 @@ To write a manual changeset:
 
 4. Commit the `.changeset/*.md` file together with your code changes and push.
 
-When the workflow sees existing changeset files, it skips auto-generation entirely and uses yours.
+**The auto-changeset script will automatically append a `### Commits` section to your manual file** listing every commit subject scoped to that package. You get your prose up top and the full commit log underneath — no extra steps required.
 
 > Use `pnpm changeset` as an interactive alternative to writing the file manually — it prompts for packages, bump level, and description.
 
