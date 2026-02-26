@@ -11,8 +11,95 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    name: Build & Test
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm turbo lint
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm turbo typecheck
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm turbo build
+
+      - name: Save build cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: |
+            packages/*/dist
+            .turbo
+          key: build-cache-${{ github.sha }}
+
+  test:
+    name: Test
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Restore build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            packages/*/dist
+            .turbo
+          key: build-cache-${{ github.sha }}
+          fail-on-cache-miss: false
+
+      - run: pnpm turbo test
+
+  docs-validate:
+    name: Validate Docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,8 +114,30 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm docs:validate
-      - run: pnpm turbo build
-      - run: pnpm turbo typecheck
-      - run: pnpm turbo lint
-      - run: pnpm turbo test
+
+  verify-release:
+    name: Verify Release Config
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Restore build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            packages/*/dist
+            .turbo
+          key: build-cache-${{ github.sha }}
+          fail-on-cache-miss: false
+
       - run: pnpm verify:release

@@ -13,8 +13,12 @@ permissions:
   id-token: write
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   release:
     name: Release
+    needs: ci
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
     steps:
@@ -31,12 +35,14 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm docs:validate
-      - run: pnpm turbo lint
-      - run: pnpm turbo typecheck
-      - run: pnpm turbo test
-      - run: pnpm turbo build
-      - run: pnpm verify:release
+      - name: Restore build cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            packages/*/dist
+            .turbo
+          key: build-cache-${{ github.sha }}
+          fail-on-cache-miss: false
 
       - name: Generate Auto Changeset
         run: node ./scripts/release/create-auto-changeset.mjs
