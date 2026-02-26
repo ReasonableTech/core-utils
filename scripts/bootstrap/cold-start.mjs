@@ -160,23 +160,6 @@ async function configureGitHubPublishingSecret({ interactive }) {
     return;
   }
 
-  const listResult = runCommand("gh", ["secret", "list", "--repo", repo]);
-  if (listResult.status !== 0) {
-    log.warn(
-      `Skipped GitHub secret setup: unable to list secrets for ${repo}.`,
-    );
-    return;
-  }
-
-  const hasToken = listResult.stdout
-    .split(/\r?\n/u)
-    .some((line) => line.split("\t")[0] === "NPM_TOKEN");
-
-  if (hasToken) {
-    log.success(`GitHub secret NPM_TOKEN already configured for ${repo}.`);
-    return;
-  }
-
   let npmToken = resolveNpmToken();
   if (npmToken === null && interactive && isInteractiveTerminal()) {
     const setNow = await promptConfirm(
@@ -217,8 +200,7 @@ async function configureGitHubPublishingSecret({ interactive }) {
     return;
   }
 
-  log.success(`Configured GitHub secret NPM_TOKEN for ${repo}.`);
-}
+  log.success(`Configured GitHub secret NPM_TOKEN for ${repo}.`);}
 
 async function main() {
   const doctorMode = process.argv.includes("--doctor");
