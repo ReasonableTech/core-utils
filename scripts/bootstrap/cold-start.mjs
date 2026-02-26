@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
 import { intro, log, outro } from "@clack/prompts";
@@ -61,33 +61,6 @@ function stripWrappingQuotes(value) {
     return trimmed.slice(1, -1);
   }
   return trimmed;
-}
-
-function resolveNpmToken() {
-  const fromEnv = process.env.NPM_TOKEN;
-  if (fromEnv !== undefined && fromEnv !== "") {
-    return fromEnv;
-  }
-
-  const npmrcPath = path.join(homedir(), ".npmrc");
-  if (!existsSync(npmrcPath)) {
-    return null;
-  }
-
-  const lines = readFileSync(npmrcPath, "utf8").split(/\r?\n/u);
-  for (const line of lines) {
-    const match = /^\/\/registry\.npmjs\.org\/:_authToken=(.+)$/u.exec(line.trim());
-    if (match === null) {
-      continue;
-    }
-    const token = match[1].trim();
-    if (token === "" || token.startsWith("${")) {
-      continue;
-    }
-    return token;
-  }
-
-  return null;
 }
 
 function isInteractiveTerminal() {
@@ -185,41 +158,6 @@ function resolveGitHubRepoContext() {
   };
 }
 
-function configureGitHubPublishingSecret({ repo, required }) {
-  const npmToken = resolveNpmToken();
-  if (npmToken === null) {
-    const message =
-      "GitHub secret NPM_TOKEN was not auto-discovered (NPM_TOKEN env or ~/.npmrc).";
-    if (required) {
-      log.error(message);
-      return false;
-    }
-    log.warn(message);
-    return true;
-  }
-
-  const setResult = runCommand(
-    "gh",
-    ["secret", "set", "NPM_TOKEN", "--repo", repo],
-    {
-      input: npmToken,
-    },
-  );
-
-  if (setResult.status !== 0) {
-    const message = `Failed to configure GitHub secret NPM_TOKEN for ${repo}.`;
-    if (required) {
-      log.error(message);
-      return false;
-    }
-    log.warn(message);
-    return true;
-  }
-
-  log.success(`Configured GitHub secret NPM_TOKEN for ${repo}.`);
-  return true;
-}
-
 function resolveTurboTeamValue(turboScope) {
   if (typeof turboScope === "string" && turboScope.trim().length > 0) {
     const normalized = normalizeTeamSlug(turboScope);
@@ -295,6 +233,73 @@ function resolveTurboToken() {
   return null;
 }
 
+function discoverPublishablePackages() {
+  const packagesRoot = path.resolve(process.cwd(), "packages");
+  if (!existsSync(packagesRoot)) {
+    return [];
+  }
+
+  const packageNames = [];
+  const entries = readdirSync(packagesRoot, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    const manifestPath = path.join(packagesRoot, entry.name, "package.json");
+    if (!existsSync(manifestPath)) {
+      continue;
+    }
+
+    try {
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+      if (manifest.private === true || typeof manifest.name !== "string") {
+        continue;
+      }
+      packageNames.push(manifest.name);
+    } catch {
+      // Ignore malformed manifests when rendering setup guidance.
+    }
+  }
+
+  return packageNames.sort((left, right) => left.localeCompare(right));
+}
+
+function logNpmTrustedPublishingGuide(repo) {
+  const parts = repo.split("/", 2);
+  const owner = parts[0] ?? "";
+  const repoName = parts[1] ?? "";
+  if (owner.length === 0 || repoName.length === 0) {
+    log.error(
+      "Unable to render npm Trusted Publishing guidance: repository owner/name could not be derived.",
+    );
+    return;
+  }
+  const publishablePackages = discoverPublishablePackages();
+
+  log.step("npm Trusted Publishing setup (one-time per package)");
+  logSubline("npm currently has no CLI/API for trusted publisher configuration.");
+  logSubline("Trusted publishing is configured per package after it exists on npm.");
+  if (publishablePackages.length > 0) {
+    logSubline("Packages in this repository:");
+    for (const packageName of publishablePackages) {
+      logSubline(`   - ${packageName}`);
+    }
+  }
+  logSubline(
+    "1. For any package not yet published, run one token-based publish to create it on npm.",
+  );
+  logSubline("2. Open npmjs.com and go to each package: Settings > Trusted Publisher.");
+  logSubline("3. Select GitHub Actions and enter:");
+  logSubline(`   - Organization or user: ${owner}`);
+  logSubline(`   - Repository: ${repoName}`);
+  logSubline("   - Workflow filename: release.yml");
+  logSubline("   - Environment: leave blank unless you enforce one in GitHub.");
+  logSubline(
+    "4. Save and re-run release; publishing will use OIDC (no long-lived npm token).",
+  );
+}
+
 function configureGitHubTurboSettings({
   repo,
   turboScope,
@@ -367,14 +372,6 @@ function configureGitHubReleaseDependencies({
     }
     log.warn(message);
     return true;
-  }
-
-  const npmConfigured = configureGitHubPublishingSecret({
-    repo: context.repo,
-    required,
-  });
-  if (!npmConfigured) {
-    return false;
   }
 
   return configureGitHubTurboSettings({
@@ -463,6 +460,10 @@ async function main() {
     });
     if (!releaseDependenciesConfigured) {
       process.exit(1);
+    }
+    const context = resolveGitHubRepoContext();
+    if (context.ok && context.repo !== null) {
+      logNpmTrustedPublishingGuide(context.repo);
     }
   }
 
