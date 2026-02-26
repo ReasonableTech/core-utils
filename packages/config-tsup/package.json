@@ -45,15 +45,13 @@
     "test:unit": "vitest run tests/unit",
     "test:watch": "vitest --watch",
     "typecheck": "tsc --noEmit",
-    "verify:package": "node ./scripts/verify-pack.mjs",
-    "verify:consumer": "node ./scripts/verify-consumer-smoke.mjs",
-    "verify:release": "node ./scripts/verify-pack.mjs && node ./scripts/verify-consumer-smoke.mjs",
-    "prepublishOnly": "tsc --noEmit && eslint . && vitest run && tsup && tsc --emitDeclarationOnly -p tsconfig.build.json && node ./scripts/verify-pack.mjs && node ./scripts/verify-consumer-smoke.mjs"
+    "verify:release": "pnpm typecheck && pnpm lint:check && pnpm test && pnpm build",
+    "prepublishOnly": "pnpm verify:release"
   },
   "devDependencies": {
     "@reasonabletech/config-eslint": "workspace:*",
     "@reasonabletech/config-typescript": "workspace:*",
-    "@types/node": "25.3.0",
+    "@types/node": "25.3.1",
     "@vitest/coverage-v8": "4.0.18",
     "esbuild": "0.27.3",
     "eslint": "10.0.2",

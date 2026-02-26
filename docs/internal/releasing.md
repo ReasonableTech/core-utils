@@ -80,7 +80,7 @@ The release job blocks publishing unless all of the following pass:
 4. `pnpm turbo build`
 5. `pnpm verify:release`
 
-`pnpm verify:release` currently validates output for `@reasonabletech/config-typescript` and `@reasonabletech/config-tsup`.
+`pnpm verify:release` validates all workspace packages using the same release gate sequence in each package.
 
 ## Versioning
 

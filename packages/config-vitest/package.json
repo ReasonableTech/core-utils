@@ -57,7 +57,8 @@
     "test:unit": "vitest run tests/unit",
     "test:watch": "vitest --watch",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm typecheck && pnpm lint:check && pnpm test && pnpm build"
+    "verify:release": "pnpm typecheck && pnpm lint:check && pnpm test && pnpm build",
+    "prepublishOnly": "pnpm verify:release"
   },
   "dependencies": {
     "@vitejs/plugin-react": "5.1.4",
@@ -67,16 +68,16 @@
   "devDependencies": {
     "@reasonabletech/config-eslint": "workspace:*",
     "@reasonabletech/config-typescript": "workspace:*",
-    "@types/node": "25.3.0",
+    "@types/node": "25.3.1",
     "@vitest/coverage-v8": "4.0.18",
     "eslint": "10.0.2",
     "tsup": "8.5.1",
     "typescript": "5.9.3",
-    "vitest": "4.0.8"
+    "vitest": "4.0.18"
   },
   "peerDependencies": {
-    "vite": "7.0.6",
-    "vitest": "4.0.8"
+    "vite": ">=7.3.1 <8",
+    "vitest": ">=4.0.18 <5"
   },
   "license": "MIT",
   "author": "Reasonable Tech Company",

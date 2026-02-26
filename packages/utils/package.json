@@ -64,14 +64,15 @@
     "test:unit": "vitest run tests/unit",
     "test:watch": "vitest --watch",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm typecheck && pnpm lint:check && pnpm test && pnpm build"
+    "verify:release": "pnpm typecheck && pnpm lint:check && pnpm test && pnpm build",
+    "prepublishOnly": "pnpm verify:release"
   },
   "devDependencies": {
     "@reasonabletech/config-eslint": "workspace:*",
     "@reasonabletech/config-tsup": "workspace:*",
     "@reasonabletech/config-typescript": "workspace:*",
     "@reasonabletech/config-vitest": "workspace:*",
-    "@types/node": "^25.3.0",
+    "@types/node": "^25.3.1",
     "@vitest/coverage-v8": "4.0.18",
     "eslint": "10.0.2",
     "tsup": "8.5.1",

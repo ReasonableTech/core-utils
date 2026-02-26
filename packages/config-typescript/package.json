@@ -46,10 +46,8 @@
     "lint:check": "echo \"No lint target for config-only package\"",
     "test": "echo 'No tests for configuration package'",
     "typecheck": "echo 'No TypeScript files to check in configuration package'",
-    "verify:package": "node ./scripts/verify-pack.mjs",
-    "verify:consumer": "node ./scripts/verify-consumer-smoke.mjs",
-    "verify:release": "node ./scripts/verify-pack.mjs && node ./scripts/verify-consumer-smoke.mjs",
-    "prepublishOnly": "echo 'No TypeScript files to check in configuration package' && echo \"No lint target for config-only package\" && echo 'No tests for configuration package' && echo 'No build needed for configuration package' && node ./scripts/verify-pack.mjs && node ./scripts/verify-consumer-smoke.mjs"
+    "verify:release": "pnpm typecheck && pnpm lint:check && pnpm test && pnpm build",
+    "prepublishOnly": "pnpm verify:release"
   },
   "author": "Reasonable Tech Company",
   "repository": {

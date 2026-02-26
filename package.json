@@ -16,9 +16,9 @@
     "quality": "turbo run lint typecheck build --continue",
     "setup": "pnpm bootstrap",
     "bootstrap": "node ./scripts/bootstrap/cold-start.mjs",
-    "setup:verify": "pnpm turbo run typecheck lint build test --continue && pnpm verify:release",
+    "setup:verify": "turbo run typecheck lint build test --continue && pnpm verify:release",
     "bootstrap:doctor": "node ./scripts/bootstrap/cold-start.mjs --doctor",
-    "verify:release": "pnpm turbo run verify:release --filter=@reasonabletech/config-typescript --filter=@reasonabletech/config-tsup",
+    "verify:release": "turbo run verify:release",
     "version-packages": "changeset version",
     "release": "changeset publish",
     "prepare": "git config core.hooksPath .githooks"
@@ -31,13 +31,25 @@
     "@commitlint/config-conventional": "^20.4.2",
     "conventional-commits-parser": "6.2.1",
     "prettier": "^3.8.1",
-    "turbo": "^2.8.10"
+    "turbo": "^2.8.11",
+    "vercel": "50.23.2"
   },
-  "packageManager": "pnpm@10.8.1",
+  "packageManager": "pnpm@10.30.2",
   "engines": {
     "node": ">=22"
   },
   "pnpm": {
+    "overrides": {
+      "tar@7.5.7": "7.5.9"
+    },
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "eslint-plugin-import>eslint": "10",
+        "eslint-plugin-jsx-a11y>eslint": "10",
+        "eslint-plugin-react>eslint": "10",
+        "eslint-plugin-react-hooks>eslint": "10"
+      }
+    },
     "onlyBuiltDependencies": [
       "esbuild",
       "unrs-resolver"

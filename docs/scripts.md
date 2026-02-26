@@ -171,11 +171,9 @@ Runs Prettier on TypeScript, JSON, and Markdown files.
 pnpm verify:release
 ```
 
-Runs release verification for `config-typescript` and `config-tsup`:
+Runs release verification across all workspace packages:
 
-- Checks package.json is valid
-- Verifies exports are correct
-- Tests consumer smoke tests
+- For every package: runs typecheck, lint:check, test, and build release gates
 
 ### `pnpm docs:validate`
 
