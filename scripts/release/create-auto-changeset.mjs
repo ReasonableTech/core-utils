@@ -145,8 +145,9 @@ function parseCommit(message) {
   });
 
   const isBreaking = parsed.breaking === "!" || hasBreakingNote;
+  const subject = typeof parsed.subject === "string" ? parsed.subject.trim() : "";
 
-  return { type, scopes, isBreaking };
+  return { type, scopes, isBreaking, subject };
 }
 
 function releaseLevelForCommit(commit) {
@@ -195,6 +196,7 @@ function computeBaseReleaseTypes(changedPackages, commitMessages) {
   const unscopedCommits = parsedCommits.filter((commit) => commit.scopes.length === 0);
 
   const releaseTypes = new Map();
+  const packageCommits = new Map();
 
   for (const pkg of changedPackages) {
     const aliases = packageAliases(pkg);
@@ -211,14 +213,15 @@ function computeBaseReleaseTypes(changedPackages, commitMessages) {
     }
 
     releaseTypes.set(pkg.name, releaseLevel ?? "patch");
+    packageCommits.set(pkg.name, sourceCommits.map((c) => c.subject).filter(Boolean));
   }
 
-  return releaseTypes;
+  return { releaseTypes, packageCommits };
 }
 
-function applyLinkedGroupRules(baseReleaseTypes) {
+function applyLinkedGroupRules(releaseTypes, packageCommits) {
   const linkedGroups = readLinkedGroups();
-  const finalTypes = new Map(baseReleaseTypes);
+  const finalTypes = new Map(releaseTypes);
 
   for (const group of linkedGroups) {
     const affected = group.filter((packageName) => finalTypes.has(packageName));
@@ -232,33 +235,50 @@ function applyLinkedGroupRules(baseReleaseTypes) {
     }
 
     for (const packageName of group) {
-      finalTypes.set(packageName, maxLevel(finalTypes.get(packageName) ?? null, groupLevel));
+      const current = finalTypes.get(packageName) ?? null;
+      finalTypes.set(packageName, maxLevel(current, groupLevel));
+      if (!packageCommits.has(packageName)) {
+        // Bumped only because of linked group — note which packages drove the bump
+        const drivers = affected.filter((p) => p !== packageName);
+        packageCommits.set(
+          packageName,
+          drivers.length > 0
+            ? [`Bumped as part of linked release group with ${drivers.join(", ")}`]
+            : [],
+        );
+      }
     }
   }
 
   return finalTypes;
 }
 
-function writeAutoChangeset(releaseTypes) {
-  if (releaseTypes.size === 0) {
-    return null;
+function writeAutoChangesets(finalReleaseTypes, packageCommits) {
+  if (finalReleaseTypes.size === 0) {
+    return [];
   }
 
   const head = (process.env.GITHUB_SHA ?? "HEAD").slice(0, 7);
-  const filename = `auto-${Date.now()}-${head}.md`;
-  const changesetPath = path.join(".changeset", filename);
+  const timestamp = Date.now();
+  const created = [];
 
-  const entries = Array.from(releaseTypes.entries()).sort(([left], [right]) => {
-    return left.localeCompare(right);
-  });
+  for (const [packageName, level] of finalReleaseTypes.entries()) {
+    const slug = packageName.replace(/[@/]/gu, "-").replace(/^-/u, "");
+    const filename = `auto-${timestamp}-${head}-${slug}.md`;
+    const changesetPath = path.join(".changeset", filename);
 
-  const frontmatter = entries
-    .map(([packageName, level]) => `"${packageName}": ${level}`)
-    .join("\n");
+    const subjects = packageCommits.get(packageName) ?? [];
+    const body =
+      subjects.length > 0
+        ? subjects.map((s) => `- ${s}`).join("\n")
+        : "- Automated release.";
 
-  const content = `---\n${frontmatter}\n---\n\nAutomated release generated from package-scoped Conventional Commits.\n`;
-  writeFileSync(changesetPath, content);
-  return { changesetPath, entries };
+    const content = `---\n"${packageName}": ${level}\n---\n\n${body}\n`;
+    writeFileSync(changesetPath, content);
+    created.push({ changesetPath, packageName, level });
+  }
+
+  return created;
 }
 
 function main() {
@@ -293,19 +313,18 @@ function main() {
     return;
   }
 
-  const baseReleaseTypes = computeBaseReleaseTypes(changedPackages, commitMessages);
-  const finalReleaseTypes = applyLinkedGroupRules(baseReleaseTypes);
-  const created = writeAutoChangeset(finalReleaseTypes);
+  const { releaseTypes, packageCommits } = computeBaseReleaseTypes(changedPackages, commitMessages);
+  const finalReleaseTypes = applyLinkedGroupRules(releaseTypes, packageCommits);
+  const created = writeAutoChangesets(finalReleaseTypes, packageCommits);
 
-  if (created === null) {
+  if (created.length === 0) {
     console.log("Auto changeset: nothing to release.");
     return;
   }
 
-  const formatted = created.entries
-    .map(([packageName, level]) => `${packageName}@${level}`)
-    .join(", ");
-  console.log(`Auto changeset: created ${created.changesetPath} for ${formatted}`);
+  for (const { changesetPath, packageName, level } of created) {
+    console.log(`Auto changeset: created ${changesetPath} for ${packageName}@${level}`);
+  }
 }
 
 main();
