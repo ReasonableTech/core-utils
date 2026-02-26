@@ -4,8 +4,8 @@ import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import path from "node:path";
-import { intro, log, outro, password } from "@clack/prompts";
-import { logSubline, promptConfirm, promptOrExit } from "./lib/ui.mjs";
+import { intro, log, outro } from "@clack/prompts";
+import { logSubline, promptConfirm } from "./lib/ui.mjs";
 import { runCommand, runCommandWithTask } from "./lib/shell.mjs";
 import {
   configureTurboRemoteCache,
@@ -159,48 +159,43 @@ async function ensureLocalNpmAuth({ interactive }) {
   return false;
 }
 
-async function configureGitHubPublishingSecret({ interactive }) {
+function resolveGitHubRepoContext() {
   const repo = parseGitHubRepoFromOrigin();
   if (repo === null) {
-    log.warn(
-      "Skipped GitHub secret setup: could not resolve GitHub origin remote.",
-    );
-    return;
+    return {
+      ok: false,
+      repo: null,
+      reason: "could not resolve GitHub origin remote",
+    };
   }
 
   const ghAuth = runCommand("gh", ["auth", "status"]);
   if (ghAuth.status !== 0) {
-    log.warn(
-      "Skipped GitHub secret setup: GitHub CLI is not authenticated.",
-    );
-    return;
+    return {
+      ok: false,
+      repo,
+      reason: "GitHub CLI is not authenticated",
+    };
   }
 
-  let npmToken = resolveNpmToken();
-  if (npmToken === null && interactive && isInteractiveTerminal()) {
-    const setNow = await promptConfirm(
-      `GitHub secret NPM_TOKEN is missing for ${repo}. Set it now?`,
-      true,
-    );
-    if (setNow) {
-      const entered = await promptOrExit(
-        password({
-          message: "Enter your NPM automation token",
-          mask: "*",
-        }),
-      );
-      const value = String(entered).trim();
-      if (value !== "") {
-        npmToken = value;
-      }
-    }
-  }
+  return {
+    ok: true,
+    repo,
+    reason: null,
+  };
+}
 
+function configureGitHubPublishingSecret({ repo, required }) {
+  const npmToken = resolveNpmToken();
   if (npmToken === null) {
-    log.warn(
-      "Skipped GitHub secret setup: NPM token not found (env var, ~/.npmrc, or prompt).",
-    );
-    return;
+    const message =
+      "GitHub secret NPM_TOKEN was not auto-discovered (NPM_TOKEN env or ~/.npmrc).";
+    if (required) {
+      log.error(message);
+      return false;
+    }
+    log.warn(message);
+    return true;
   }
 
   const setResult = runCommand(
@@ -212,11 +207,17 @@ async function configureGitHubPublishingSecret({ interactive }) {
   );
 
   if (setResult.status !== 0) {
-    log.error(`Failed to configure GitHub secret NPM_TOKEN for ${repo}.`);
-    return;
+    const message = `Failed to configure GitHub secret NPM_TOKEN for ${repo}.`;
+    if (required) {
+      log.error(message);
+      return false;
+    }
+    log.warn(message);
+    return true;
   }
 
   log.success(`Configured GitHub secret NPM_TOKEN for ${repo}.`);
+  return true;
 }
 
 function resolveTurboTeamValue(turboScope) {
@@ -277,7 +278,7 @@ function resolveVercelAuthTokenFromDisk() {
   return null;
 }
 
-async function resolveTurboToken({ interactive, repo }) {
+function resolveTurboToken() {
   const envToken = process.env.TURBO_TOKEN?.trim() ?? "";
   if (envToken.length > 0) {
     return envToken;
@@ -291,72 +292,43 @@ async function resolveTurboToken({ interactive, repo }) {
     return diskToken;
   }
 
-  if (!interactive || !isInteractiveTerminal()) {
-    return null;
-  }
-
-  const entered = await promptOrExit(
-    password({
-      message: `Enter Turbo remote cache token for ${repo}`,
-      mask: "*",
-    }),
-  );
-  const value = String(entered).trim();
-  return value.length > 0 ? value : null;
+  return null;
 }
 
-async function configureGitHubTurboSettings({
-  interactive,
+function configureGitHubTurboSettings({
+  repo,
   turboScope,
-  requireTurboToken,
+  required,
 }) {
-  const repo = parseGitHubRepoFromOrigin();
-  if (repo === null) {
-    const message =
-      "GitHub Turbo settings failed: could not resolve GitHub origin remote.";
-    if (requireTurboToken) {
-      log.error(message);
-      return false;
-    }
-    log.warn(message);
-    return true;
-  }
-
-  const ghAuth = runCommand("gh", ["auth", "status"]);
-  if (ghAuth.status !== 0) {
-    const message =
-      "GitHub Turbo settings failed: GitHub CLI is not authenticated.";
-    if (requireTurboToken) {
-      log.error(message);
-      return false;
-    }
-    log.warn(message);
-    return true;
-  }
-
   const turboTeam = resolveTurboTeamValue(turboScope);
-  if (turboTeam !== null) {
-    const setTeam = setGitHubVariable(repo, "TURBO_TEAM", turboTeam);
-
-    if (setTeam.status === 0) {
-      log.success(`Configured GitHub variable TURBO_TEAM for ${repo}.`);
-    } else {
-      log.warn(`Failed to configure GitHub variable TURBO_TEAM for ${repo}.`);
+  if (turboTeam === null) {
+    const message =
+      "GitHub variable TURBO_TEAM was not auto-discovered (Turbo link scope or .env.local).";
+    if (required) {
+      log.error(message);
+      return false;
     }
-  } else {
-    log.warn(
-      "Skipped GitHub variable TURBO_TEAM: no Turbo team scope was detected.",
-    );
+    log.warn(message);
+    return true;
   }
 
-  const turboToken = await resolveTurboToken({
-    interactive,
-    repo,
-  });
+  const setTeam = setGitHubVariable(repo, "TURBO_TEAM", turboTeam);
+  if (setTeam.status !== 0) {
+    const message = `Failed to configure GitHub variable TURBO_TEAM for ${repo}.`;
+    if (required) {
+      log.error(message);
+      return false;
+    }
+    log.warn(message);
+    return true;
+  }
+  log.success(`Configured GitHub variable TURBO_TEAM for ${repo}.`);
+
+  const turboToken = resolveTurboToken();
   if (turboToken == null) {
     const message =
-      "GitHub secret TURBO_TOKEN was not provided. Set TURBO_TOKEN/VERCEL_TOKEN or provide it at prompt.";
-    if (requireTurboToken) {
+      "GitHub secret TURBO_TOKEN was not auto-discovered (TURBO_TOKEN/VERCEL_TOKEN/env or local Vercel auth).";
+    if (required) {
       log.error(message);
       return false;
     }
@@ -368,7 +340,7 @@ async function configureGitHubTurboSettings({
 
   if (setToken.status !== 0) {
     const message = `Failed to configure GitHub secret TURBO_TOKEN for ${repo}.`;
-    if (requireTurboToken) {
+    if (required) {
       log.error(message);
       return false;
     }
@@ -378,6 +350,38 @@ async function configureGitHubTurboSettings({
 
   log.success(`Configured GitHub secret TURBO_TOKEN for ${repo}.`);
   return true;
+}
+
+function configureGitHubReleaseDependencies({
+  turboScope,
+  required,
+}) {
+  log.step("GitHub release dependencies");
+
+  const context = resolveGitHubRepoContext();
+  if (!context.ok || context.repo === null) {
+    const message = `GitHub release dependency setup failed: ${context.reason ?? "unknown error"}.`;
+    if (required) {
+      log.error(message);
+      return false;
+    }
+    log.warn(message);
+    return true;
+  }
+
+  const npmConfigured = configureGitHubPublishingSecret({
+    repo: context.repo,
+    required,
+  });
+  if (!npmConfigured) {
+    return false;
+  }
+
+  return configureGitHubTurboSettings({
+    repo: context.repo,
+    turboScope,
+    required,
+  });
 }
 
 function logFollowUpItems(title, items) {
@@ -431,10 +435,6 @@ async function main() {
     await ensureLocalNpmAuth({ interactive: true });
   }
 
-  if (!skipRemote) {
-    await configureGitHubPublishingSecret({ interactive: !doctorMode });
-  }
-
   if (doctorMode) {
     outro("Doctor check complete.");
     return;
@@ -457,12 +457,11 @@ async function main() {
       "Turbo remote cache follow-up",
       turboRemoteCache.followUpItems,
     );
-    const turboSettingsConfigured = await configureGitHubTurboSettings({
-      interactive: !doctorMode,
+    const releaseDependenciesConfigured = configureGitHubReleaseDependencies({
       turboScope: turboRemoteCache.scope,
-      requireTurboToken: turboRemoteCache.linked,
+      required: true,
     });
-    if (!turboSettingsConfigured) {
+    if (!releaseDependenciesConfigured) {
       process.exit(1);
     }
   }
