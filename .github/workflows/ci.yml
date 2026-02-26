@@ -2,10 +2,19 @@ name: Continuous Integration
 
 on:
   workflow_call:
+    secrets:
+      TURBO_TOKEN:
+        required: false
+      TURBO_TEAM:
+        required: false
   pull_request:
     branches: [main]
   push:
     branches: [main]
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM != '' && vars.TURBO_TEAM || secrets.TURBO_TEAM }}
 
 concurrency:
   group: ci-${{ github.ref }}-${{ github.event_name }}

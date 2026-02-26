@@ -7,7 +7,11 @@ import path from "node:path";
 import { intro, log, outro, password } from "@clack/prompts";
 import { logSubline, promptConfirm, promptOrExit } from "./lib/ui.mjs";
 import { runCommand, runCommandWithTask } from "./lib/shell.mjs";
-import { configureTurboRemoteCache } from "./lib/turbo-remote-cache.mjs";
+import {
+  configureTurboRemoteCache,
+  normalizeTeamSlug,
+  parseEnvFile,
+} from "./lib/turbo-remote-cache.mjs";
 
 function checkNodeVersion() {
   const major = Number(process.versions.node.split(".")[0]);
@@ -49,6 +53,14 @@ function parseGitHubRepoFromOrigin() {
   }
 
   return null;
+}
+
+function stripWrappingQuotes(value) {
+  const trimmed = value.trim();
+  if (trimmed.length >= 2 && trimmed.startsWith('"') && trimmed.endsWith('"')) {
+    return trimmed.slice(1, -1);
+  }
+  return trimmed;
 }
 
 function resolveNpmToken() {
@@ -207,6 +219,167 @@ async function configureGitHubPublishingSecret({ interactive }) {
   log.success(`Configured GitHub secret NPM_TOKEN for ${repo}.`);
 }
 
+function resolveTurboTeamValue(turboScope) {
+  if (typeof turboScope === "string" && turboScope.trim().length > 0) {
+    const normalized = normalizeTeamSlug(turboScope);
+    if (normalized.length > 0) {
+      return normalized;
+    }
+  }
+
+  const envPath = path.resolve(process.cwd(), ".env.local");
+  const envValues = parseEnvFile(envPath);
+  const rawTeam = stripWrappingQuotes(envValues.get("TURBO_TEAM") ?? "");
+  const normalized = normalizeTeamSlug(rawTeam);
+  return normalized.length > 0 ? normalized : null;
+}
+
+function setGitHubVariable(repo, key, value) {
+  return runCommand(
+    "gh",
+    ["variable", "set", key, "--repo", repo, "--body", value],
+  );
+}
+
+function setGitHubSecret(repo, key, value) {
+  return runCommand(
+    "gh",
+    ["secret", "set", key, "--repo", repo],
+    {
+      input: value,
+    },
+  );
+}
+
+function resolveVercelAuthTokenFromDisk() {
+  const candidatePaths = [
+    path.join(homedir(), "Library", "Application Support", "com.vercel.cli", "auth.json"),
+    path.join(homedir(), ".config", "com.vercel.cli", "auth.json"),
+    path.join(homedir(), ".vercel", "auth.json"),
+  ];
+
+  for (const candidatePath of candidatePaths) {
+    if (!existsSync(candidatePath)) {
+      continue;
+    }
+
+    try {
+      const parsed = JSON.parse(readFileSync(candidatePath, "utf8"));
+      const token = parsed?.token;
+      if (typeof token === "string" && token.trim().length > 0) {
+        return token.trim();
+      }
+    } catch {
+      // Continue trying the next known auth location.
+    }
+  }
+
+  return null;
+}
+
+async function resolveTurboToken({ interactive, repo }) {
+  const envToken = process.env.TURBO_TOKEN?.trim() ?? "";
+  if (envToken.length > 0) {
+    return envToken;
+  }
+  const vercelToken = process.env.VERCEL_TOKEN?.trim() ?? "";
+  if (vercelToken.length > 0) {
+    return vercelToken;
+  }
+  const diskToken = resolveVercelAuthTokenFromDisk();
+  if (diskToken != null) {
+    return diskToken;
+  }
+
+  if (!interactive || !isInteractiveTerminal()) {
+    return null;
+  }
+
+  const entered = await promptOrExit(
+    password({
+      message: `Enter Turbo remote cache token for ${repo}`,
+      mask: "*",
+    }),
+  );
+  const value = String(entered).trim();
+  return value.length > 0 ? value : null;
+}
+
+async function configureGitHubTurboSettings({
+  interactive,
+  turboScope,
+  requireTurboToken,
+}) {
+  const repo = parseGitHubRepoFromOrigin();
+  if (repo === null) {
+    const message =
+      "GitHub Turbo settings failed: could not resolve GitHub origin remote.";
+    if (requireTurboToken) {
+      log.error(message);
+      return false;
+    }
+    log.warn(message);
+    return true;
+  }
+
+  const ghAuth = runCommand("gh", ["auth", "status"]);
+  if (ghAuth.status !== 0) {
+    const message =
+      "GitHub Turbo settings failed: GitHub CLI is not authenticated.";
+    if (requireTurboToken) {
+      log.error(message);
+      return false;
+    }
+    log.warn(message);
+    return true;
+  }
+
+  const turboTeam = resolveTurboTeamValue(turboScope);
+  if (turboTeam !== null) {
+    const setTeam = setGitHubVariable(repo, "TURBO_TEAM", turboTeam);
+
+    if (setTeam.status === 0) {
+      log.success(`Configured GitHub variable TURBO_TEAM for ${repo}.`);
+    } else {
+      log.warn(`Failed to configure GitHub variable TURBO_TEAM for ${repo}.`);
+    }
+  } else {
+    log.warn(
+      "Skipped GitHub variable TURBO_TEAM: no Turbo team scope was detected.",
+    );
+  }
+
+  const turboToken = await resolveTurboToken({
+    interactive,
+    repo,
+  });
+  if (turboToken == null) {
+    const message =
+      "GitHub secret TURBO_TOKEN was not provided. Set TURBO_TOKEN/VERCEL_TOKEN or provide it at prompt.";
+    if (requireTurboToken) {
+      log.error(message);
+      return false;
+    }
+    log.warn(message);
+    return true;
+  }
+
+  const setToken = setGitHubSecret(repo, "TURBO_TOKEN", turboToken);
+
+  if (setToken.status !== 0) {
+    const message = `Failed to configure GitHub secret TURBO_TOKEN for ${repo}.`;
+    if (requireTurboToken) {
+      log.error(message);
+      return false;
+    }
+    log.warn(message);
+    return true;
+  }
+
+  log.success(`Configured GitHub secret TURBO_TOKEN for ${repo}.`);
+  return true;
+}
+
 function logFollowUpItems(title, items) {
   if (items.length === 0) {
     return;
@@ -284,6 +457,14 @@ async function main() {
       "Turbo remote cache follow-up",
       turboRemoteCache.followUpItems,
     );
+    const turboSettingsConfigured = await configureGitHubTurboSettings({
+      interactive: !doctorMode,
+      turboScope: turboRemoteCache.scope,
+      requireTurboToken: turboRemoteCache.linked,
+    });
+    if (!turboSettingsConfigured) {
+      process.exit(1);
+    }
   }
 
   if (!skipVerify) {
