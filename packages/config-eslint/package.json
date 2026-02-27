@@ -30,6 +30,10 @@
     "./react": {
       "types": "./dist/src/react.d.ts",
       "import": "./dist/src/react.js"
+    },
+    "./custom-rules": {
+      "types": "./dist/src/custom-rules/index.d.ts",
+      "import": "./dist/src/custom-rules/index.js"
     }
   },
   "scripts": {
