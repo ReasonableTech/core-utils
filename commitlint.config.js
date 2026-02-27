@@ -35,6 +35,7 @@ export default {
         "config-tsup",
         "config-vitest",
         "config-eslint",
+        "eslint-config",
         "config-playwright",
         "utils",
       ],
