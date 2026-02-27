@@ -15,6 +15,8 @@
 
 // Re-export all error handling functionality
 export {
+  noErrorMessageParsingRule,
+  noInlineErrorUnionsRule,
   createErrorHandlingRules,
   createErrorMessageParsingRules,
   createErrorTypeDocumentationRules,
@@ -42,6 +44,7 @@ export {
 
 // Re-export type safety rules
 export {
+  noAsAnyRule,
   createNoAnyRules,
   createResultTypeRules,
   createTypeSafetyRules,
@@ -52,6 +55,7 @@ export {
 // Re-export code quality rules
 export {
   noLinterDisablingRule,
+  noBarrelExportsRule,
   createBarrelExportRules,
   createAsyncPatternRules,
   createTerminologyRules,

@@ -5,6 +5,7 @@
  * patterns, particularly around Result types and type assertions.
  */
 
+import { AST_NODE_TYPES, ESLintUtils, type TSESTree } from "@typescript-eslint/utils";
 import type { Linter } from "eslint";
 import { mergeRuleConfigurations } from "./utils.js";
 
@@ -17,6 +18,82 @@ export interface TypeSafetyRuleOptions {
   /** Whether to allow type assertions in test files (default: false) */
   allowInTests?: boolean;
 }
+
+/**
+ * Custom ESLint rule that prevents `as any` and `<any>` type casts
+ *
+ * This rule detects all forms of casting to `any`, including:
+ * - `expr as any`
+ * - `<any>expr`
+ * - Double casts through any: `(expr as any) as T`
+ *
+ * Each variant produces a distinct, descriptive error message rather than the
+ * generic "no-restricted-syntax" label that the previous AST-selector approach
+ * showed in editors.
+ */
+export const noAsAnyRule = ESLintUtils.RuleCreator(
+  () => "docs/standards/typescript-standards.md",
+)({
+  name: "no-as-any",
+  meta: {
+    type: "problem",
+    docs: {
+      description:
+        "Prevents 'as any' and '<any>' type casts that bypass TypeScript's type checking",
+    },
+    messages: {
+      asAny:
+        "Never use 'as any' casts. Use proper type assertions or type guards instead.",
+      angleAny:
+        "Never use '<any>' casts. Use proper type assertions or type guards instead.",
+      doubleCast:
+        "Never use double casts through 'as any'. Use proper type guards instead.",
+    },
+    schema: [],
+  },
+  defaultOptions: [],
+  create(context) {
+    /**
+     * Checks whether a TSAnyKeyword is a direct child of a TSAsExpression
+     * and, if so, whether the cast is part of a double-cast pattern.
+     */
+    function checkAsExpression(node: TSESTree.TSAsExpression): void {
+      if (node.typeAnnotation.type !== AST_NODE_TYPES.TSAnyKeyword) {
+        return;
+      }
+
+      // Double-cast pattern: (expr as any) as T — the inner `as any` lives
+      // inside an outer TSAsExpression.
+      const parent = node.parent;
+      if (
+        parent !== undefined &&
+        parent.type === AST_NODE_TYPES.TSAsExpression &&
+        parent.expression === node
+      ) {
+        context.report({ node: node.typeAnnotation, messageId: "doubleCast" });
+        return;
+      }
+
+      context.report({ node: node.typeAnnotation, messageId: "asAny" });
+    }
+
+    /**
+     * Checks whether a TSTypeAssertion (angle-bracket syntax) casts to any.
+     */
+    function checkTypeAssertion(node: TSESTree.TSTypeAssertion): void {
+      if (node.typeAnnotation.type !== AST_NODE_TYPES.TSAnyKeyword) {
+        return;
+      }
+
+      context.report({ node: node.typeAnnotation, messageId: "angleAny" });
+    }
+
+    return {
+      TSAsExpression: checkAsExpression,
+      TSTypeAssertion: checkTypeAssertion,
+    };
+  },
+});
 
 /**
  * Creates rules that prevent `as any` type casts
@@ -43,21 +120,7 @@ export function createNoAnyRules(
 ): Linter.RulesRecord {
   return {
     "@typescript-eslint/no-explicit-any": "error",
-    "no-restricted-syntax": [
-      "error",
-      {
-        selector: "TSAsExpression > TSAnyKeyword",
-        message: `❌ FORBIDDEN: Never use 'as any' casts. Use proper type assertions or type guards instead.`,
-      },
-      {
-        selector: "TSTypeAssertion > TSAnyKeyword",
-        message: `❌ FORBIDDEN: Never use '<any>' casts. Use proper type assertions or type guards instead.`,
-      },
-      {
-        selector: "TSAsExpression > TSAsExpression > TSAnyKeyword",
-        message: `❌ FORBIDDEN: Never use double casts through 'as any'. Use proper type guards instead.`,
-      },
-    ],
+    "@reasonabletech/no-as-any": "error",
   };
 }
 

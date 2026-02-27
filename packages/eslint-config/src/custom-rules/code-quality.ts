@@ -240,6 +240,45 @@ function checkJustification(
 }
 
 /**
+ * Custom ESLint rule that prevents barrel exports (`export *`)
+ *
+ * Barrel exports create bloated namespaces and make it harder to track
+ * what's exported from a module. This rule flags all `export * from "..."`
+ * declarations, enforcing explicit named exports instead.
+ *
+ * ❌ `export * from "./user-service";`
+ * ✅ `export { UserService, type CreateUserError } from "./user-service";`
+ */
+export const noBarrelExportsRule = ESLintUtils.RuleCreator(
+  () => "docs/standards/typescript-standards.md",
+)({
+  name: "no-barrel-exports",
+  meta: {
+    type: "suggestion",
+    docs: {
+      description:
+        "Prevents 'export *' barrel exports that create bloated namespaces",
+    },
+    messages: {
+      barrelExport:
+        "Never use 'export *' barrel exports. Use explicit named exports or import from specific modules.",
+    },
+    schema: [],
+  },
+  defaultOptions: [],
+  create(context) {
+    return {
+      ExportAllDeclaration(node): void {
+        context.report({
+          node,
+          messageId: "barrelExport",
+        });
+      },
+    };
+  },
+});
+
+/**
  * Creates rules for detecting barrel exports (export *)
  *
  * These rules prevent the use of `export *` patterns, which create
@@ -267,14 +306,7 @@ export function createBarrelExportRules(
   _options: { allowedPatterns?: string[] } = {},
 ): Linter.RulesRecord {
   return {
-    "no-restricted-syntax": [
-      "error",
-      {
-        selector: "ExportAllDeclaration",
-        message:
-          "❌ FORBIDDEN: Never use 'export *' barrel exports. Use explicit named exports or import from specific modules.",
-      },
-    ],
+    "@reasonabletech/no-barrel-exports": "error",
   };
 }
 
