@@ -15,7 +15,9 @@ function run(command, args, options = {}) {
   } catch (error) {
     const stdout = String(error.stdout ?? "").trim();
     const stderr = String(error.stderr ?? "").trim();
-    const message = [stderr, stdout].filter((part) => part.length > 0).join("\n");
+    const message = [stderr, stdout]
+      .filter((part) => part.length > 0)
+      .join("\n");
     if (message.length > 0) {
       throw new Error(message);
     }
@@ -48,10 +50,7 @@ function parseArgs(argv) {
 
   return {
     mode,
-    packDir:
-      packDir == null
-        ? null
-        : path.resolve(process.cwd(), packDir),
+    packDir: packDir == null ? null : path.resolve(process.cwd(), packDir),
     statusFile:
       statusFile == null
         ? path.resolve(process.cwd(), defaultStatusFile)
@@ -60,18 +59,26 @@ function parseArgs(argv) {
 }
 
 function loadReleasePackagesFromChangesets(statusFilePath) {
-  mkdirSync(path.dirname(statusFilePath), { recursive: true });
-  const repoRelativeStatusPath = path.relative(process.cwd(), statusFilePath);
-  run("pnpm", ["exec", "changeset", "status", "--output", repoRelativeStatusPath], {
-    env: {
-      ...process.env,
-      CI: "1",
-    },
-  });
+  if (!existsSync(statusFilePath)) {
+    mkdirSync(path.dirname(statusFilePath), { recursive: true });
+    const repoRelativeStatusPath = path.relative(process.cwd(), statusFilePath);
+    run(
+      "pnpm",
+      ["exec", "changeset", "status", "--output", repoRelativeStatusPath],
+      {
+        env: {
+          ...process.env,
+          CI: "1",
+        },
+      },
+    );
+  }
 
   const parsed = JSON.parse(readFileSync(statusFilePath, "utf8"));
   if (!Array.isArray(parsed.releases)) {
-    throw new Error("Changeset status output did not include a releases array.");
+    throw new Error(
+      "Changeset status output did not include a releases array.",
+    );
   }
 
   const names = new Set();
@@ -164,7 +171,10 @@ function assertExportTargetsExistInPacklist(packageName, manifest, packFiles) {
 
     if (normalized.includes("*")) {
       const matcher = new RegExp(
-        `^${normalized.split("*").map((part) => escapeRegExp(part)).join(".*")}$`,
+        `^${normalized
+          .split("*")
+          .map((part) => escapeRegExp(part))
+          .join(".*")}$`,
         "u",
       );
       const matched = [...packFiles].some((filePath) => matcher.test(filePath));
@@ -208,7 +218,9 @@ function runPackCheck(pkg, options) {
   const packFiles = new Set(
     files
       .map((entry) =>
-        entry != null && typeof entry === "object" && typeof entry.path === "string"
+        entry != null &&
+        typeof entry === "object" &&
+        typeof entry.path === "string"
           ? entry.path
           : null,
       )
@@ -229,7 +241,9 @@ function main() {
     mkdirSync(options.packDir, { recursive: true });
   }
 
-  const releasePackageNames = loadReleasePackagesFromChangesets(options.statusFile);
+  const releasePackageNames = loadReleasePackagesFromChangesets(
+    options.statusFile,
+  );
   if (releasePackageNames.length === 0) {
     console.log("Release preflight: no packages scheduled for release.");
     return;
@@ -261,9 +275,7 @@ function main() {
       );
       continue;
     }
-    console.log(
-      `Packed: ${item.packageName} -> ${item.filename}`,
-    );
+    console.log(`Packed: ${item.packageName} -> ${item.filename}`);
   }
 }
 

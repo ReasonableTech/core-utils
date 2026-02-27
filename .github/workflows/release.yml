@@ -97,6 +97,11 @@ jobs:
       - name: Generate Auto Changeset
         run: node ./scripts/release/create-auto-changeset.mjs
 
+      - name: Capture release status before versioning
+        run: |
+          mkdir -p .release-artifacts
+          pnpm exec changeset status --output .release-artifacts/release-status.json
+
       - name: Version Packages
         run: pnpm version-packages
 
