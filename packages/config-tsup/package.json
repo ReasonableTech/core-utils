@@ -1,6 +1,6 @@
 {
   "name": "@reasonabletech/config-tsup",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shared tsup configuration for ReasonableTech packages",
   "keywords": [
     "reasonabletech",
