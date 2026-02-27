@@ -34,7 +34,6 @@ export const baseRules: Linter.RulesRecord = {
   "no-lonely-if": "error",
   "no-nested-ternary": "error",
   "no-param-reassign": "error",
-  "no-throw-literal": "error",
   "no-return-assign": "error",
   "no-unneeded-ternary": "error",
   "no-useless-concat": "error",
@@ -181,6 +180,8 @@ export const typeAwareRules: Linter.RulesRecord = {
   "@typescript-eslint/dot-notation": "error", // Use TypeScript version that respects optional properties
   "no-return-await": "off", // Disable base rule
   "@typescript-eslint/return-await": ["error", "always"], // Always return await for better stack traces
+  "no-throw-literal": "off", // Disable deprecated base rule
+  "@typescript-eslint/only-throw-error": "error", // Type-aware replacement that validates thrown values
 };
 
 // Import the new modular error handling rules

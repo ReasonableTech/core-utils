@@ -63,11 +63,11 @@ describe("Type-aware ESLint configuration", () => {
     "@typescript-eslint/prefer-optional-chain",
     "@typescript-eslint/prefer-nullish-coalescing",
     "@typescript-eslint/require-array-sort-compare",
+    "@typescript-eslint/only-throw-error",
   ];
 
   const coreJavaScriptRules = [
     "prefer-const",
-    "no-throw-literal",
     "prefer-promise-reject-errors",
   ];
 
