@@ -11,6 +11,10 @@ import { noNullUndefinedChecksRule } from "./custom-rules/null-undefined-checks.
 import { useResultHelpersRule } from "./custom-rules/platform-conventions.js";
 
 export const reasonableTechPlugin = {
+  meta: {
+    name: "@reasonabletech/eslint-plugin",
+    version: "0.1.0",
+  },
   rules: {
     "no-dependency-bundling": noDependencyBundlingRule,
     "no-linter-disabling": noLinterDisablingRule,
