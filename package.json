@@ -30,6 +30,7 @@
     "@commitlint/cli": "^20.4.2",
     "@commitlint/config-conventional": "^20.4.2",
     "conventional-commits-parser": "6.2.1",
+    "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
     "turbo": "^2.8.11",
     "vercel": "50.23.2"
@@ -37,6 +38,14 @@
   "packageManager": "pnpm@10.30.2",
   "engines": {
     "node": ">=22"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,mjs}": [
+      "eslint --fix"
+    ],
+    "*.{ts,tsx,md,json,mjs}": [
+      "prettier --write"
+    ]
   },
   "pnpm": {
     "overrides": {

@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# Ensure eslint-config is built if its source changed
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+if echo "$staged" | grep -q '^packages/eslint-config/src/'; then
+  echo "eslint-config source changed — rebuilding..."
+  pnpm --filter=@reasonabletech/eslint-config build || exit 1
+fi
+
+# Run lint-staged (eslint + prettier on staged files)
+pnpm exec lint-staged || exit 1
+
+# Typecheck affected packages
+affected_packages=""
+for pkg_dir in packages/*/; do
+  pkg_name=$(node -p "require('./${pkg_dir}package.json').name" 2>/dev/null)
+  if [ -z "$pkg_name" ]; then continue; fi
+  if echo "$staged" | grep -q "^${pkg_dir}"; then
+    affected_packages="$affected_packages --filter=$pkg_name"
+  fi
+done
+
+if [ -n "$affected_packages" ]; then
+  echo "Typechecking affected packages..."
+  pnpm $affected_packages typecheck || exit 1
+fi
