@@ -6,7 +6,7 @@ Security updates are provided for the 0.1.x release line of all packages in this
 
 | Package | Supported Versions |
 | ------- | ------------------ |
-| @reasonabletech/config-eslint | 0.1.x |
+| @reasonabletech/eslint-config | 0.1.x |
 | @reasonabletech/config-playwright | 0.1.x |
 | @reasonabletech/config-tsup | 0.1.x |
 | @reasonabletech/config-typescript | 0.1.x |

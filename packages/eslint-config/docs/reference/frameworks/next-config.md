@@ -1,6 +1,6 @@
 # Next.js ESLint Configuration
 
-The Next.js configuration (`@reasonabletech/config-eslint/next`) provides comprehensive TypeScript, React, and Next.js rules specifically tailored for Next.js applications in the monorepo.
+The Next.js configuration (`@reasonabletech/eslint-config/next`) provides comprehensive TypeScript, React, and Next.js rules specifically tailored for Next.js applications in the monorepo.
 
 ## Features
 
@@ -16,7 +16,7 @@ The Next.js configuration (`@reasonabletech/config-eslint/next`) provides compre
 This package is installed as a workspace dependency:
 
 ```bash
-pnpm add -D @reasonabletech/config-eslint
+pnpm add -D @reasonabletech/eslint-config
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ Create an `eslint.config.mjs` file in your project root:
 
 ```javascript
 // eslint.config.mjs
-import { createTypeAwareNextConfig } from "@reasonabletech/config-eslint/next";
+import { createTypeAwareNextConfig } from "@reasonabletech/eslint-config/next";
 
 export default createTypeAwareNextConfig(import.meta.dirname);
 ```
@@ -119,7 +119,7 @@ Like React configuration, Next.js enforces strict boolean expressions to prevent
 
 ```javascript
 // eslint.config.js
-import { config as nextConfig } from "@reasonabletech/config-eslint/next";
+import { config as nextConfig } from "@reasonabletech/eslint-config/next";
 
 export default [
   ...nextConfig,
@@ -149,7 +149,7 @@ When working with Next.js App Directory:
 
 ```javascript
 // eslint.config.js
-import { config as nextConfig } from "@reasonabletech/config-eslint/next";
+import { config as nextConfig } from "@reasonabletech/eslint-config/next";
 
 export default [
   ...nextConfig,

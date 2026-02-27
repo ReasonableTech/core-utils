@@ -5,7 +5,7 @@
  * with App Router, server components, and modern Next.js features.
  */
 
-import { createTypeAwareNextConfig } from "@reasonabletech/config-eslint/next";
+import { createTypeAwareNextConfig } from "@reasonabletech/eslint-config/next";
 
 /**
  * Next.js optimized configuration with App Router support,

@@ -66,7 +66,7 @@
     "vitest": "4.0.18"
   },
   "devDependencies": {
-    "@reasonabletech/config-eslint": "workspace:*",
+    "@reasonabletech/eslint-config": "workspace:*",
     "@reasonabletech/config-typescript": "workspace:*",
     "@types/node": "25.3.1",
     "@vitest/coverage-v8": "4.0.18",

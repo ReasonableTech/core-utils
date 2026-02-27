@@ -1,4 +1,4 @@
-# @reasonabletech/config-eslint
+# @reasonabletech/eslint-config
 
 ## [Unreleased]
 

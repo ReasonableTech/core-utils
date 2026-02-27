@@ -5,7 +5,7 @@
  * with TypeScript, build outputs, and package publishing considerations.
  */
 
-import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
 
 /**
  * React library configuration optimized for component libraries,

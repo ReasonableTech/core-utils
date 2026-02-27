@@ -68,7 +68,7 @@
     "prepublishOnly": "pnpm verify:release"
   },
   "devDependencies": {
-    "@reasonabletech/config-eslint": "workspace:*",
+    "@reasonabletech/eslint-config": "workspace:*",
     "@reasonabletech/config-tsup": "workspace:*",
     "@reasonabletech/config-typescript": "workspace:*",
     "@reasonabletech/config-vitest": "workspace:*",

@@ -1,6 +1,6 @@
 # Architecture
 
-This document outlines the architectural design and principles behind `@reasonabletech/config-eslint`, explaining the decisions made to create a maintainable, modular, and consistent ESLint configuration system for the monorepo.
+This document outlines the architectural design and principles behind `@reasonabletech/eslint-config`, explaining the decisions made to create a maintainable, modular, and consistent ESLint configuration system for the monorepo.
 
 ## Design Principles
 

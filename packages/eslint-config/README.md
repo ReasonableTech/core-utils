@@ -1,16 +1,16 @@
-# @reasonabletech/config-eslint
+# @reasonabletech/eslint-config
 
-[![npm version](https://img.shields.io/npm/v/@reasonabletech/config-eslint.svg)](https://www.npmjs.com/package/@reasonabletech/config-eslint)
-[![npm downloads](https://img.shields.io/npm/dm/@reasonabletech/config-eslint.svg)](https://www.npmjs.com/package/@reasonabletech/config-eslint)
+[![npm version](https://img.shields.io/npm/v/@reasonabletech/eslint-config.svg)](https://www.npmjs.com/package/@reasonabletech/eslint-config)
+[![npm downloads](https://img.shields.io/npm/dm/@reasonabletech/eslint-config.svg)](https://www.npmjs.com/package/@reasonabletech/eslint-config)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 
-`@reasonabletech/config-eslint` provides opinionated, type-aware ESLint flat configs for TypeScript, React, and Next.js projects. Type-aware linting runs ESLint rules that require a TypeScript project reference — these rules catch issues like unsafe `any` assignments and incorrect promise handling that non-type-aware rules miss.
+`@reasonabletech/eslint-config` provides opinionated, type-aware ESLint flat configs for TypeScript, React, and Next.js projects. Type-aware linting runs ESLint rules that require a TypeScript project reference — these rules catch issues like unsafe `any` assignments and incorrect promise handling that non-type-aware rules miss.
 
 ## Installation
 
 ```bash
-pnpm add -D @reasonabletech/config-eslint eslint typescript
+pnpm add -D @reasonabletech/eslint-config eslint typescript
 ```
 
 ## Peer Dependencies
@@ -26,9 +26,9 @@ This package uses ESLint flat config format (introduced in ESLint 9.0) and requi
 
 | Import Path                           | Purpose                    | Main Exports                                         |
 | ------------------------------------- | -------------------------- | ---------------------------------------------------- |
-| `@reasonabletech/config-eslint`       | TypeScript baseline config | `createTypeAwareConfig`, `sharedReactComponentRules` |
-| `@reasonabletech/config-eslint/react` | React project config       | `createTypeAwareReactConfig`                         |
-| `@reasonabletech/config-eslint/next`  | Next.js project config     | `createTypeAwareNextConfig`                          |
+| `@reasonabletech/eslint-config`       | TypeScript baseline config | `createTypeAwareConfig`, `sharedReactComponentRules` |
+| `@reasonabletech/eslint-config/react` | React project config       | `createTypeAwareReactConfig`                         |
+| `@reasonabletech/eslint-config/next`  | Next.js project config     | `createTypeAwareNextConfig`                          |
 
 ## Usage
 
@@ -36,7 +36,7 @@ This package uses ESLint flat config format (introduced in ESLint 9.0) and requi
 
 ```ts
 // eslint.config.mjs
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default createTypeAwareConfig(import.meta.dirname);
 ```
@@ -45,7 +45,7 @@ export default createTypeAwareConfig(import.meta.dirname);
 
 ```ts
 // eslint.config.mjs
-import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
 
 export default createTypeAwareReactConfig(import.meta.dirname);
 ```
@@ -54,7 +54,7 @@ export default createTypeAwareReactConfig(import.meta.dirname);
 
 ```ts
 // eslint.config.mjs
-import { createTypeAwareNextConfig } from "@reasonabletech/config-eslint/next";
+import { createTypeAwareNextConfig } from "@reasonabletech/eslint-config/next";
 
 export default createTypeAwareNextConfig(import.meta.dirname);
 ```
@@ -63,7 +63,7 @@ export default createTypeAwareNextConfig(import.meta.dirname);
 
 ```ts
 // eslint.config.mjs
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default [
   ...createTypeAwareConfig(import.meta.dirname),

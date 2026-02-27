@@ -497,13 +497,13 @@ describe("Rule selector patterns", () => {
 
 ```bash
 # Run all custom rule tests
-pnpm --filter=@reasonabletech/config-eslint test tests/unit/
+pnpm --filter=@reasonabletech/eslint-config test tests/unit/
 
 # Run specific rule tests
-pnpm --filter=@reasonabletech/config-eslint test tests/unit/my-rule.test.ts
+pnpm --filter=@reasonabletech/eslint-config test tests/unit/my-rule.test.ts
 
 # Run with coverage
-pnpm --filter=@reasonabletech/config-eslint test:coverage
+pnpm --filter=@reasonabletech/eslint-config test:coverage
 ```
 
 ---

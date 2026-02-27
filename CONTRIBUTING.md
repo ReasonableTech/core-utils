@@ -67,7 +67,7 @@ See **[docs/standards/git-guidelines.md](./docs/standards/git-guidelines.md)** f
 
 ### PR Requirements
 
-- **Title**: Follow Conventional Commits format (e.g., `feat(config-eslint): add React rules`).
+- **Title**: Follow Conventional Commits format (e.g., `feat(eslint-config): add React rules`).
 - **Description**: Explain what the PR does and why *we* would want it.
 - **Tests**: Include tests for new functionality.
 - **Changeset**: Include if the change affects published packages.

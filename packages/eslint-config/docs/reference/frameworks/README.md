@@ -4,7 +4,7 @@ Framework-specific ESLint configurations with specialized rules and patterns.
 
 ## Overview
 
-This section provides detailed documentation for framework-specific ESLint configurations, including React, Next.js, and other popular development frameworks supported by `@reasonabletech/config-eslint`.
+This section provides detailed documentation for framework-specific ESLint configurations, including React, Next.js, and other popular development frameworks supported by `@reasonabletech/eslint-config`.
 
 ## Available Frameworks
 
@@ -48,7 +48,7 @@ All framework configurations follow the same usage pattern:
 
 ```typescript
 // Framework-specific import
-import { createTypeAware[Framework]Config } from "@reasonabletech/config-eslint/[framework]";
+import { createTypeAware[Framework]Config } from "@reasonabletech/eslint-config/[framework]";
 
 // Project directory configuration
 export default createTypeAware[Framework]Config(import.meta.dirname);

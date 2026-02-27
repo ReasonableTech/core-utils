@@ -1,5 +1,5 @@
 {
-  "name": "@reasonabletech/config-eslint",
+  "name": "@reasonabletech/eslint-config",
   "version": "0.1.0",
   "description": "Shared ESLint configuration",
   "keywords": [
@@ -95,12 +95,12 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/ReasonableTech/core-utils.git",
-    "directory": "packages/config-eslint"
+    "directory": "packages/eslint-config"
   },
   "bugs": {
     "url": "https://github.com/ReasonableTech/core-utils/issues"
   },
-  "homepage": "https://github.com/ReasonableTech/core-utils/tree/main/packages/config-eslint",
+  "homepage": "https://github.com/ReasonableTech/core-utils/tree/main/packages/eslint-config",
   "files": [
     "dist",
     "docs/**/*",

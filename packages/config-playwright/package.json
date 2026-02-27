@@ -56,7 +56,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.58.2",
-    "@reasonabletech/config-eslint": "workspace:*",
+    "@reasonabletech/eslint-config": "workspace:*",
     "@reasonabletech/config-tsup": "workspace:*",
     "@reasonabletech/config-typescript": "workspace:*",
     "@reasonabletech/config-vitest": "workspace:*",

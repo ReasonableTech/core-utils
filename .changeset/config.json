@@ -8,7 +8,7 @@
   "fixed": [],
   "linked": [
     [
-      "@reasonabletech/config-eslint",
+      "@reasonabletech/eslint-config",
       "@reasonabletech/config-typescript",
       "@reasonabletech/config-tsup",
       "@reasonabletech/config-vitest",

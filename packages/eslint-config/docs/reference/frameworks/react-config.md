@@ -1,6 +1,6 @@
 # React ESLint Configuration
 
-The React configuration (`@reasonabletech/config-eslint/react`) provides comprehensive TypeScript and React rules specifically tailored for React projects in the monorepo.
+The React configuration (`@reasonabletech/eslint-config/react`) provides comprehensive TypeScript and React rules specifically tailored for React projects in the monorepo.
 
 ## Features
 
@@ -16,7 +16,7 @@ The React configuration (`@reasonabletech/config-eslint/react`) provides compreh
 This package is installed as a workspace dependency:
 
 ```bash
-pnpm add -D @reasonabletech/config-eslint
+pnpm add -D @reasonabletech/eslint-config
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ Create an `eslint.config.mjs` file in your project root:
 
 ```javascript
 // eslint.config.mjs
-import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
 
 export default createTypeAwareReactConfig(import.meta.dirname);
 ```
@@ -194,7 +194,7 @@ return (
 
 ```javascript
 // eslint.config.mjs
-import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
 
 export default [
   ...createTypeAwareReactConfig(import.meta.dirname),

@@ -92,7 +92,7 @@ feat(utils): add retry helper with exponential backoff
 chore: update all dependencies
 
 # ✅ Valid - breaking change with valid scope
-feat(config-eslint)!: rename preset function
+feat(eslint-config)!: rename preset function
 
 # ❌ Invalid - scope not in commitlint.config.js
 feat(wrong-scope): something
@@ -149,7 +149,7 @@ Safe alternatives:
 
 ```bash
 # ✅ Good - specific files
-git add packages/config-eslint/index.ts packages/utils/src/result.ts
+git add packages/eslint-config/index.ts packages/utils/src/result.ts
 
 # ✅ Good - interactive staging
 git add -p src/components/Button.tsx

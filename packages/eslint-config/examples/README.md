@@ -1,4 +1,4 @@
-# @reasonabletech/config-eslint Examples
+# @reasonabletech/eslint-config Examples
 
 Example ESLint configurations for different project types.
 
@@ -17,7 +17,7 @@ Each example shows a complete `eslint.config.mjs` file. Copy the relevant exampl
 ### TypeScript Project
 
 ```typescript
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default createTypeAwareConfig(import.meta.dirname);
 ```
@@ -25,7 +25,7 @@ export default createTypeAwareConfig(import.meta.dirname);
 ### React Project
 
 ```typescript
-import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
 
 export default createTypeAwareReactConfig(import.meta.dirname);
 ```
@@ -33,7 +33,7 @@ export default createTypeAwareReactConfig(import.meta.dirname);
 ### Next.js Project
 
 ```typescript
-import { createTypeAwareNextConfig } from "@reasonabletech/config-eslint/next";
+import { createTypeAwareNextConfig } from "@reasonabletech/eslint-config/next";
 
 export default createTypeAwareNextConfig(import.meta.dirname);
 ```
@@ -41,7 +41,7 @@ export default createTypeAwareNextConfig(import.meta.dirname);
 ### Adding Custom Overrides
 
 ```typescript
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default [
   ...createTypeAwareConfig(import.meta.dirname),

@@ -1,6 +1,6 @@
 # ESLint Rule Antipatterns
 
-> Authoritative reference for code antipatterns enforced by `@reasonabletech/config-eslint`
+> Authoritative reference for code antipatterns enforced by `@reasonabletech/eslint-config`
 
 This document catalogs all prohibited code patterns detected by custom ESLint rules. It serves as the definitive reference for understanding why certain patterns are forbidden and how to write correct alternatives.
 
@@ -734,20 +734,20 @@ import Input from "your-ui-library/input";
 
 ### ESLint Rule Source Code
 
-All custom rules live in `packages/config-eslint/src/custom-rules/`:
+All custom rules live in `packages/eslint-config/src/custom-rules/`:
 
-- [error-handling.ts](../../packages/config-eslint/src/custom-rules/error-handling.ts) - Antipatterns #1-4
-- [null-undefined-checks.ts](../../packages/config-eslint/src/custom-rules/null-undefined-checks.ts) - Antipattern #5
-- [type-safety.ts](../../packages/config-eslint/src/custom-rules/type-safety.ts) - Antipattern #6
-- [architecture-patterns.ts](../../packages/config-eslint/src/custom-rules/architecture-patterns.ts) - Antipatterns #7-9
-- [code-quality.ts](../../packages/config-eslint/src/custom-rules/code-quality.ts) - Antipatterns #10-12
-- [platform-conventions.ts](../../packages/config-eslint/src/custom-rules/platform-conventions.ts) - Antipatterns #13-14
+- [error-handling.ts](../../packages/eslint-config/src/custom-rules/error-handling.ts) - Antipatterns #1-4
+- [null-undefined-checks.ts](../../packages/eslint-config/src/custom-rules/null-undefined-checks.ts) - Antipattern #5
+- [type-safety.ts](../../packages/eslint-config/src/custom-rules/type-safety.ts) - Antipattern #6
+- [architecture-patterns.ts](../../packages/eslint-config/src/custom-rules/architecture-patterns.ts) - Antipatterns #7-9
+- [code-quality.ts](../../packages/eslint-config/src/custom-rules/code-quality.ts) - Antipatterns #10-12
+- [platform-conventions.ts](../../packages/eslint-config/src/custom-rules/platform-conventions.ts) - Antipatterns #13-14
 
 ### Testing
 
-- [Unit tests](../../packages/config-eslint/tests/unit/) - Rule configuration and options
-- [Integration tests](../../packages/config-eslint/tests/integration/) - `Linter.verify()` against code samples
-- [Test fixtures](../../packages/config-eslint/tests/fixtures/code-samples/) - Violation and correct code samples
+- [Unit tests](../../packages/eslint-config/tests/unit/) - Rule configuration and options
+- [Integration tests](../../packages/eslint-config/tests/integration/) - `Linter.verify()` against code samples
+- [Test fixtures](../../packages/eslint-config/tests/fixtures/code-samples/) - Violation and correct code samples
 
 ### Referenced By
 
@@ -757,4 +757,4 @@ This authoritative reference is linked from:
 - [Architecture Principles](./architecture-principles.md) - References antipatterns #7-9
 - [TypeScript Design Patterns](./typescript-design-patterns.md) - References antipattern #5
 - [TypeScript Standards](./typescript-standards.md) - References all type-related antipatterns
-- [Custom Rules README](../../packages/config-eslint/src/custom-rules/README.md) - Implementation guide
+- [Custom Rules README](../../packages/eslint-config/src/custom-rules/README.md) - Implementation guide

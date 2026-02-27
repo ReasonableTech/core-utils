@@ -28,7 +28,7 @@ import type { Linter } from "eslint";
  * @example
  * ```typescript
  * // In your eslint.config.mjs
- * import { createTypeAwareNextConfig } from "@reasonabletech/config-eslint/next";
+ * import { createTypeAwareNextConfig } from "@reasonabletech/eslint-config/next";
  *
  * export default createTypeAwareNextConfig(import.meta.dirname);
  * ```

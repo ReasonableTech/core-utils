@@ -20,7 +20,7 @@ import type { Linter } from "eslint";
  * @example
  * ```typescript
  * // In your eslint.config.mjs
- * import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+ * import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
  * 
  * export default createTypeAwareReactConfig(import.meta.dirname);
  * ```

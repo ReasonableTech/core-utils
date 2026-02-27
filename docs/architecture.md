@@ -10,7 +10,7 @@ core-utils/
 │   ├── config-typescript/       # TypeScript tsconfig presets
 │   ├── config-tsup/             # tsup build configuration
 │   ├── config-vitest/           # Vitest test configuration
-│   ├── config-eslint/           # ESLint flat-config factories
+│   ├── eslint-config/           # ESLint flat-config factories
 │   ├── config-playwright/       # Playwright browser test config
 │   └── utils/                   # Runtime utility functions
 ├── scripts/                     # Build and release tooling
@@ -30,7 +30,7 @@ The config packages are **linked** for versioning—when one gets a major bump, 
 ```
 config-typescript ←── config-tsup (uses tsconfig presets)
                  ←── config-vitest (uses tsconfig presets)
-                 ←── config-eslint (uses tsconfig presets)
+                 ←── eslint-config (uses tsconfig presets)
                  ←── config-playwright (standalone)
 ```
 
@@ -38,7 +38,7 @@ config-typescript ←── config-tsup (uses tsconfig presets)
 
 Within the monorepo, packages have build-time dependencies:
 
-- `config-eslint` must build before other packages can lint (they use its output)
+- `eslint-config` must build before other packages can lint (they use its output)
 - `config-typescript` presets are consumed by other packages' tsconfig files
 - `config-tsup` is used to build other packages
 
@@ -66,7 +66,7 @@ packages:
 Turbo orchestrates tasks across packages. Key configurations in `turbo.json`:
 
 - `build` depends on upstream packages building first (`^build`)
-- `lint` depends on `config-eslint` being built
+- `lint` depends on `eslint-config` being built
 - `typecheck` depends on upstream typechecks (`^typecheck`)
 
 See [Tooling](./tooling.md) for details on Turbo configuration.

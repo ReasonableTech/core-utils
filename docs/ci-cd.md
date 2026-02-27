@@ -38,7 +38,7 @@ All jobs must pass for PRs to merge.
 pnpm lint
 
 # See specific errors
-pnpm turbo run lint --filter=@reasonabletech/config-eslint
+pnpm turbo run lint --filter=@reasonabletech/eslint-config
 ```
 
 **Type errors:**

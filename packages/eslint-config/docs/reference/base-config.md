@@ -1,6 +1,6 @@
 # Base ESLint Configuration
 
-The base configuration (`@reasonabletech/config-eslint`) provides fundamental linting rules suitable for all TypeScript projects in the monorepo.
+The base configuration (`@reasonabletech/eslint-config`) provides fundamental linting rules suitable for all TypeScript projects in the monorepo.
 
 ## Features
 
@@ -16,7 +16,7 @@ The base configuration (`@reasonabletech/config-eslint`) provides fundamental li
 This package is installed as a workspace dependency:
 
 ```bash
-pnpm add -D @reasonabletech/config-eslint
+pnpm add -D @reasonabletech/eslint-config
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ Create an `eslint.config.js` file in your project root:
 
 ```javascript
 // eslint.config.js
-import { config } from "@reasonabletech/config-eslint";
+import { config } from "@reasonabletech/eslint-config";
 
 export default config;
 ```
@@ -90,7 +90,7 @@ All ESLint warnings are treated as errors in the the codebase. This design choic
 
 ```javascript
 // eslint.config.js
-import { config as baseConfig } from "@reasonabletech/config-eslint";
+import { config as baseConfig } from "@reasonabletech/eslint-config";
 
 export default [
   ...baseConfig,

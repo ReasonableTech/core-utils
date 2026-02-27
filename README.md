@@ -13,7 +13,7 @@ Shared engineering configuration and utility packages published by ReasonableTec
 | `@reasonabletech/config-typescript` | `tsconfig` presets for apps, libraries, and tooling | [README](./packages/config-typescript/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-typescript) |
 | `@reasonabletech/config-tsup` | `tsup` build configuration factories | [README](./packages/config-tsup/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-tsup) |
 | `@reasonabletech/config-vitest` | Vitest configuration factories with coverage defaults | [README](./packages/config-vitest/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-vitest) |
-| `@reasonabletech/config-eslint` | ESLint flat-config factories and custom rules for TypeScript, React, and Next.js | [README](./packages/config-eslint/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-eslint) |
+| `@reasonabletech/eslint-config` | ESLint flat-config factories and custom rules for TypeScript, React, and Next.js | [README](./packages/eslint-config/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/eslint-config) |
 | `@reasonabletech/config-playwright` | Playwright configuration factories for single-app and cross-app test suites | [README](./packages/config-playwright/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-playwright) |
 | `@reasonabletech/utils` | Runtime utilities: Result types, datetime, object helpers, retry, async pipelines | [README](./packages/utils/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/utils) |
 
@@ -29,7 +29,7 @@ pnpm add -D \
   @reasonabletech/config-typescript \
   @reasonabletech/config-tsup \
   @reasonabletech/config-vitest \
-  @reasonabletech/config-eslint \
+  @reasonabletech/eslint-config \
   @reasonabletech/config-playwright
 pnpm add @reasonabletech/utils
 ```
@@ -63,7 +63,7 @@ export default createVitestConfig(import.meta.dirname);
 ### `eslint.config.mjs`
 
 ```js
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default createTypeAwareConfig(import.meta.dirname);
 ```

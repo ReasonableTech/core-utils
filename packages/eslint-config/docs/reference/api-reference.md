@@ -4,10 +4,10 @@
 
 The package exposes three entry points. All internal modules (`base-configs`, `shared-rules`, `shared-ignores`, etc.) are **not** part of the public API.
 
-### `@reasonabletech/config-eslint`
+### `@reasonabletech/eslint-config`
 
 ```typescript
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 ```
 
 #### `createTypeAwareConfig(projectDir: string): Linter.Config[]`
@@ -35,10 +35,10 @@ Creates a comprehensive type-aware ESLint configuration for TypeScript projects.
 
 ---
 
-### `@reasonabletech/config-eslint/react`
+### `@reasonabletech/eslint-config/react`
 
 ```typescript
-import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
 ```
 
 #### `createTypeAwareReactConfig(projectDir: string): Linter.Config[]`
@@ -59,10 +59,10 @@ Creates a type-aware ESLint configuration for React projects.
 
 ---
 
-### `@reasonabletech/config-eslint/next`
+### `@reasonabletech/eslint-config/next`
 
 ```typescript
-import { createTypeAwareNextConfig } from "@reasonabletech/config-eslint/next";
+import { createTypeAwareNextConfig } from "@reasonabletech/eslint-config/next";
 ```
 
 #### `createTypeAwareNextConfig(projectDir: string): Linter.Config[]`
@@ -181,7 +181,7 @@ Subset of rules suitable for non-projects. Accepts a custom documentation base U
 
 ```typescript
 // eslint.config.mjs
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default createTypeAwareConfig(import.meta.dirname);
 ```
@@ -190,7 +190,7 @@ export default createTypeAwareConfig(import.meta.dirname);
 
 ```typescript
 // eslint.config.mjs
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default [
   ...createTypeAwareConfig(import.meta.dirname),
@@ -206,7 +206,7 @@ export default [
 
 ```typescript
 // eslint.config.mjs
-import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
 
 export default [
   ...createTypeAwareReactConfig(import.meta.dirname),

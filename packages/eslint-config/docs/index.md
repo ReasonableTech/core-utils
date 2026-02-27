@@ -1,4 +1,4 @@
-# @reasonabletech/config-eslint Documentation
+# @reasonabletech/eslint-config Documentation
 
 For quick setup, see the [README](../README.md).
 

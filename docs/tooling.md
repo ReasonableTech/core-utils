@@ -30,7 +30,7 @@ Defined in `turbo.json`:
       "outputs": ["dist/**"]
     },
     "lint": {
-      "dependsOn": ["@reasonabletech/config-eslint#build"]
+      "dependsOn": ["@reasonabletech/eslint-config#build"]
     }
   }
 }
@@ -39,7 +39,7 @@ Defined in `turbo.json`:
 Key points:
 
 - `^build` means "build upstream dependencies first"
-- `lint` waits for `config-eslint` to build (we use our own ESLint config)
+- `lint` waits for `eslint-config` to build (we use our own ESLint config)
 - Turbo caches outputs—rebuilds only what changed
 
 ### Filtering
@@ -75,7 +75,7 @@ Defined in `.changeset/config.json`:
 {
   "changelog": ["@changesets/changelog-github", { "repo": "ReasonableTech/core-utils" }],
   "linked": [
-    ["@reasonabletech/config-eslint", "@reasonabletech/config-typescript", ...]
+    ["@reasonabletech/eslint-config", "@reasonabletech/config-typescript", ...]
   ],
   "access": "public",
   "baseBranch": "main"
@@ -124,7 +124,7 @@ export default {
       "config-typescript",
       "config-tsup",
       "config-vitest",
-      "config-eslint",
+      "eslint-config",
       "config-playwright",
       "utils",
       "repo",
@@ -140,7 +140,7 @@ export default {
 | `config-typescript` | TypeScript preset changes |
 | `config-tsup` | tsup config changes |
 | `config-vitest` | Vitest config changes |
-| `config-eslint` | ESLint config changes |
+| `eslint-config` | ESLint config changes |
 | `config-playwright` | Playwright config changes |
 | `utils` | Runtime utilities changes |
 | `repo` | Monorepo-wide changes |
@@ -190,14 +190,14 @@ VS Code users: Install the Prettier extension and enable format-on-save:
 
 ## ESLint
 
-We use our own `@reasonabletech/config-eslint` package.
+We use our own `@reasonabletech/eslint-config` package.
 
 ### How We Use It
 
 Each package has an `eslint.config.mjs`:
 
 ```javascript
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default createTypeAwareConfig(import.meta.dirname);
 ```
@@ -210,7 +210,7 @@ Our ESLint config enables TypeScript-aware rules that catch bugs regular linting
 - No floating promises (must await or handle)
 - Consistent type imports
 
-See [@reasonabletech/config-eslint docs](../packages/config-eslint/docs/index.md) for details.
+See [@reasonabletech/eslint-config docs](../packages/eslint-config/docs/index.md) for details.
 
 ---
 

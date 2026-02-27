@@ -18,7 +18,7 @@ Each package has its own documentation:
 - [@reasonabletech/config-typescript](../packages/config-typescript/docs/README.md)
 - [@reasonabletech/config-tsup](../packages/config-tsup/docs/README.md)
 - [@reasonabletech/config-vitest](../packages/config-vitest/docs/README.md)
-- [@reasonabletech/config-eslint](../packages/config-eslint/docs/index.md)
+- [@reasonabletech/eslint-config](../packages/eslint-config/docs/index.md)
 - [@reasonabletech/config-playwright](../packages/config-playwright/docs/README.md)
 - [@reasonabletech/utils](../packages/utils/docs/README.md)
 

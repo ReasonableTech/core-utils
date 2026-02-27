@@ -25,14 +25,14 @@ export { sharedReactComponentRules } from "./shared/react-rules.js";
  *
  * **Standalone TypeScript projects:**
  * ```typescript
- * import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+ * import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
  * export default createTypeAwareConfig(import.meta.dirname);
  * ```
  *
  * **Extended configurations:**
  * ```typescript
- * import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
- * import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+ * import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
+ * import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
  *
  * // React config automatically extends this base config
  * export default createTypeAwareReactConfig(import.meta.dirname);
@@ -55,14 +55,14 @@ export { sharedReactComponentRules } from "./shared/react-rules.js";
  * @example
  * ```typescript
  * // Basic usage in eslint.config.mjs
- * import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+ * import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
  *
  * export default createTypeAwareConfig(import.meta.dirname);
  * ```
  * @example
  * ```typescript
  * // Extending with custom rules
- * import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+ * import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
  *
  * export default [
  *   ...createTypeAwareConfig(import.meta.dirname),

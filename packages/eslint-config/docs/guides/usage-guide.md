@@ -5,7 +5,7 @@
 ### 1. Installation
 
 ```bash
-pnpm add -D @reasonabletech/config-eslint
+pnpm add -D @reasonabletech/eslint-config
 ```
 
 ### 2. Basic Setup
@@ -14,7 +14,7 @@ Create an `eslint.config.mjs` file in your project root:
 
 ```typescript
 // eslint.config.mjs
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default createTypeAwareConfig(import.meta.dirname);
 ```
@@ -44,7 +44,7 @@ pnpm lint
 
 ```typescript
 // eslint.config.mjs
-import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
 
 export default createTypeAwareReactConfig(import.meta.dirname);
 ```
@@ -55,7 +55,7 @@ Adds React Hooks rules, JSX transform support, browser globals, and relaxed para
 
 ```typescript
 // eslint.config.mjs
-import { createTypeAwareNextConfig } from "@reasonabletech/config-eslint/next";
+import { createTypeAwareNextConfig } from "@reasonabletech/eslint-config/next";
 
 export default createTypeAwareNextConfig(import.meta.dirname);
 ```
@@ -68,7 +68,7 @@ Spread the config and add overrides after it:
 
 ```typescript
 // eslint.config.mjs
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default [
   ...createTypeAwareConfig(import.meta.dirname),
@@ -85,7 +85,7 @@ export default [
 
 ```typescript
 // eslint.config.mjs
-import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
 
 export default [
   ...createTypeAwareReactConfig(import.meta.dirname),
@@ -106,7 +106,7 @@ Each package can have its own `eslint.config.mjs`:
 
 ```typescript
 // packages/my-package/eslint.config.mjs
-import { createTypeAwareReactConfig } from "@reasonabletech/config-eslint/react";
+import { createTypeAwareReactConfig } from "@reasonabletech/eslint-config/react";
 
 export default createTypeAwareReactConfig(import.meta.dirname);
 ```
@@ -115,7 +115,7 @@ export default createTypeAwareReactConfig(import.meta.dirname);
 
 ```typescript
 // eslint.config.mjs (root)
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default createTypeAwareConfig(import.meta.dirname);
 ```
@@ -138,7 +138,7 @@ The configuration automatically ignores files that would cause TypeScript projec
 
 ```typescript
 // eslint.config.mjs
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default [
   ...createTypeAwareConfig(import.meta.dirname),
@@ -205,7 +205,7 @@ export default createTypeAwareConfig(import.meta.dirname);
 Verify the package is installed:
 
 ```bash
-pnpm list @reasonabletech/config-eslint
+pnpm list @reasonabletech/eslint-config
 ```
 
 ### Performance on Large Projects

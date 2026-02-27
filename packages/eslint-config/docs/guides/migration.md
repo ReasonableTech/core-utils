@@ -1,6 +1,6 @@
 # Migration Guide
 
-This guide documents breaking changes and how to migrate between major versions of @reasonabletech/config-eslint.
+This guide documents breaking changes and how to migrate between major versions of @reasonabletech/eslint-config.
 
 ## Current Version
 

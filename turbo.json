@@ -14,7 +14,7 @@
       "outputs": ["generated/test-coverage/**"]
     },
     "lint": {
-      "dependsOn": ["@reasonabletech/config-eslint#build"]
+      "dependsOn": ["@reasonabletech/eslint-config#build"]
     },
     "typecheck": {
       "dependsOn": ["^typecheck"]

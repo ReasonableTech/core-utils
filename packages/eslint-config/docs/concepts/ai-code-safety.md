@@ -30,7 +30,7 @@ Type-aware ESLint rules are mandatory across all projects:
 
 ```typescript
 // Canonical setup (required)
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 export default createTypeAwareConfig(import.meta.dirname);
 ```
 
@@ -226,7 +226,7 @@ if (isValidUser(user)) {
 All projects should use one of the package configuration factories:
 
 ```typescript
-import { createTypeAwareConfig } from "@reasonabletech/config-eslint";
+import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
 export default createTypeAwareConfig(import.meta.dirname);
 ```
