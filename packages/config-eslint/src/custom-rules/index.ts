@@ -247,13 +247,3 @@ export function createGenericRulePreset(
     },
   });
 }
-
-// Legacy exports for backward compatibility
-export const errorHandlingRules: Linter.RulesRecord =
-  createPlatformErrorHandlingRules();
-export const architecturePatternRules: Linter.RulesRecord =
-  createPlatformArchitecturePatternRules();
-export const typeSafetyRules: Linter.RulesRecord =
-  createPlatformTypeSafetyRules();
-export const codeQualityRules: Linter.RulesRecord =
-  createPlatformCodeQualityRules();

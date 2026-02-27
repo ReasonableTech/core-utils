@@ -171,21 +171,3 @@ export const typeAwareRules: Linter.RulesRecord = {
   "no-throw-literal": "off", // Disable deprecated base rule
   "@typescript-eslint/only-throw-error": "error", // Type-aware replacement that validates thrown values
 };
-
-// Import the new modular error handling rules
-import { createPlatformRulePreset } from "./custom-rules/index.js";
-
-/**
- * Error handling rules that enforce error type standards.
- *
- * These rules implement the mandatory error handling patterns defined in:
- * - docs/standards/error-handling.md
- * - docs/standards/error-type-standards.md
- *
- * CRITICAL: These rules prevent dangerous error message parsing patterns
- * and enforce documented error type extraction requirements.
- * @deprecated Use createPlatformRulePreset() from ./custom-rules instead.
- * This export is maintained for backward compatibility.
- */
-export const errorHandlingRules: Linter.RulesRecord =
-  createPlatformRulePreset();

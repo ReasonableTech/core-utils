@@ -25,11 +25,8 @@ import type { Linter } from "eslint";
 
 import { reasonableTechPlugin } from "./plugin.js";
 import { sharedIgnores } from "./shared-ignores.js";
-import {
-  baseRules,
-  typeAwareRules,
-  errorHandlingRules,
-} from "./shared-rules.js";
+import { baseRules, typeAwareRules } from "./shared-rules.js";
+import { createPlatformRulePreset } from "./custom-rules/index.js";
 import { createNoTypeofInExpectRules } from "./custom-rules/test-quality.js";
 
 /**
@@ -100,7 +97,7 @@ export function createTypeAwareBaseConfig(projectDir: string): Linter.Config[] {
       rules: {
         ...baseRules,
         ...typeAwareRules,
-        ...errorHandlingRules, // Include all custom rules in one place
+        ...createPlatformRulePreset(),
       },
     },
     {
