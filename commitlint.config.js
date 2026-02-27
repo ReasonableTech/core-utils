@@ -38,6 +38,7 @@ export default {
         "eslint-config",
         "config-playwright",
         "utils",
+        "release",
       ],
     ],
     // Allow empty scope for general changes (chore, fix, docs, etc.)
