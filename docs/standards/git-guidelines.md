@@ -45,9 +45,9 @@ Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>"
 
 ## Workflow Rules and Exceptions
 
-- **Trust the tooling** — commit-msg hook is authoritative
+- **Trust the tooling** — pre-commit and commit-msg hooks are authoritative
 - **Fix, don't bypass** — resolve hook failures instead of skipping
-- **No proactive repo-wide validation** — avoid `pnpm typecheck`/`pnpm lint` unless:
+- **No proactive repo-wide validation** — the pre-commit hook handles lint and typecheck for affected packages automatically. Avoid running `pnpm typecheck`/`pnpm lint` manually unless:
   - You changed tooling/configuration that affects the whole repo (ESLint config, tsconfig, etc.)
 - **Local builds are OK** — run `pnpm build` for the packages you touched if useful
 - **Single atomic commit** — don't split commits because hooks failed; fix the failures
@@ -69,7 +69,18 @@ See [CONTRIBUTING.md](../../CONTRIBUTING.md) for full format details.
 
 ### Pre-commit Hook
 
-This repository does not currently configure a pre-commit hook. Quality gates are enforced by running `pnpm typecheck` and `pnpm lint` before committing.
+**Source of truth**: `.githooks/pre-commit`
+
+Runs automatically on every commit. The hook performs three steps in order:
+
+1. **eslint-config rebuild** — If staged files include `packages/eslint-config/src/**`, the config package is rebuilt before other checks run. This ensures other packages lint against the latest config.
+2. **lint-staged** — Runs ESLint (`--fix`) and Prettier (`--write`) on staged files only. Fixed files are automatically re-staged. If unfixable errors remain, the commit is blocked.
+3. **Typecheck** — Detects which packages have staged files and runs `pnpm --filter=<pkg> typecheck` for each affected package. Skipped if no package files are staged (e.g., root-only changes).
+
+The lint-staged configuration is defined in the root `package.json`:
+
+- `*.{ts,tsx,mjs}` — ESLint with autofix
+- `*.{ts,tsx,md,json,mjs}` — Prettier with autofix
 
 ### Commit-msg Hook
 
@@ -113,6 +124,8 @@ See `commitlint.config.js` for the complete list of valid scopes.
 2. Fix **all** reported issues in the failing files
 3. Re-stage the fixes
 4. Re-run the **same atomic command**
+
+**Pre-commit failures**: lint-staged auto-fixes what it can (ESLint, Prettier) and re-stages the results. If the commit still fails, the remaining errors require manual fixes. Typecheck failures always require manual fixes.
 
 **Do not** use `git restore`/`git reset` to drop failing files after hooks fail. Those commands are acceptable for staging cleanup **before** the commit, but not as a bypass.
 
