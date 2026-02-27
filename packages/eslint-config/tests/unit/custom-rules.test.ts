@@ -22,7 +22,7 @@ describe("Custom Rules Module", () => {
       const rules = createErrorHandlingRules();
 
       expect(rules).toBeDefined();
-      expect(rules["no-restricted-syntax"]).toBeDefined();
+      expect(rules["@reasonabletech/no-error-message-parsing"]).toBeDefined();
       expect(rules["jsdoc/require-jsdoc"]).toBeDefined();
       expect(rules["@typescript-eslint/naming-convention"]).toBeDefined();
     });
@@ -33,7 +33,7 @@ describe("Custom Rules Module", () => {
       });
 
       expect(rules).toBeDefined();
-      expect(rules["no-restricted-syntax"]).toBeDefined();
+      expect(rules["@reasonabletech/no-error-message-parsing"]).toBeDefined();
       expect(rules["jsdoc/require-jsdoc"]).toBeUndefined();
     });
   });

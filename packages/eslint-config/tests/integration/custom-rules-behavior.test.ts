@@ -113,21 +113,26 @@ import {
 describe("Custom Rules Integration Tests", () => {
   describe("Error Message Parsing Rules", () => {
     const linter = new Linter();
-    // Only test the specific no-restricted-syntax rules for error message parsing
-    const rules = {
-      "no-restricted-syntax":
-        createErrorHandlingRules()["no-restricted-syntax"],
+    // Only test the specific error message parsing rule
+    const rules: Linter.RulesRecord = {
+      "@reasonabletech/no-error-message-parsing":
+        createErrorHandlingRules()["@reasonabletech/no-error-message-parsing"],
+    };
+
+    const config: Linter.Config = {
+      rules,
+      plugins: {
+        "@reasonabletech": reasonableTechEslintPlugin,
+      },
+      languageOptions: {
+        parser: typescriptParser,
+        ecmaVersion: 2022,
+        sourceType: "module",
+      },
     };
 
     it("should catch error.message.includes() violations", () => {
-      const messages = linter.verify(errorMessageIncludesViolation, {
-        rules,
-        languageOptions: {
-          parser: typescriptParser,
-          ecmaVersion: 2022,
-          sourceType: "module",
-        },
-      });
+      const messages = linter.verify(errorMessageIncludesViolation, config);
 
       const violation = messages.find(
         (m) =>
@@ -141,14 +146,7 @@ describe("Custom Rules Integration Tests", () => {
     });
 
     it("should catch error.message.startsWith() violations", () => {
-      const messages = linter.verify(errorMessageStartsWithViolation, {
-        rules,
-        languageOptions: {
-          parser: typescriptParser,
-          ecmaVersion: 2022,
-          sourceType: "module",
-        },
-      });
+      const messages = linter.verify(errorMessageStartsWithViolation, config);
 
       const violation = messages.find(
         (m) =>
@@ -161,14 +159,7 @@ describe("Custom Rules Integration Tests", () => {
     });
 
     it("should catch error.message === comparison violations", () => {
-      const messages = linter.verify(errorMessageEqualityViolation, {
-        rules,
-        languageOptions: {
-          parser: typescriptParser,
-          ecmaVersion: 2022,
-          sourceType: "module",
-        },
-      });
+      const messages = linter.verify(errorMessageEqualityViolation, config);
 
       const violation = messages.find(
         (m) =>
@@ -181,18 +172,14 @@ describe("Custom Rules Integration Tests", () => {
     });
 
     it("should catch error.message.match() violations", () => {
-      const messages = linter.verify(errorMessageRegexViolation, {
-        rules,
-        languageOptions: {
-          parser: typescriptParser,
-          ecmaVersion: 2022,
-          sourceType: "module",
-        },
-      });
+      const messages = linter.verify(errorMessageRegexViolation, config);
 
       const violation = messages.find(
         (m) =>
-          m.message.includes("regex") || m.message.includes("error.message"),
+          m.message.includes("regex") ||
+          m.message.includes("error.message") ||
+          m.message.includes("parse error messages") ||
+          m.message.includes(".match()"),
       );
 
       expect(violation).toBeDefined();
@@ -200,28 +187,14 @@ describe("Custom Rules Integration Tests", () => {
     });
 
     it("should allow error.code and error.status checks", () => {
-      const messages = linter.verify(errorCodeCheckCorrect, {
-        rules,
-        languageOptions: {
-          parser: typescriptParser,
-          ecmaVersion: 2022,
-          sourceType: "module",
-        },
-      });
+      const messages = linter.verify(errorCodeCheckCorrect, config);
 
       const violations = messages.filter((m) => m.severity === 2);
       expect(violations).toHaveLength(0);
     });
 
     it("should allow instanceof checks", () => {
-      const messages = linter.verify(instanceofCheckCorrect, {
-        rules,
-        languageOptions: {
-          parser: typescriptParser,
-          ecmaVersion: 2022,
-          sourceType: "module",
-        },
-      });
+      const messages = linter.verify(instanceofCheckCorrect, config);
 
       const violations = messages.filter((m) => m.severity === 2);
       expect(violations).toHaveLength(0);
@@ -304,6 +277,7 @@ describe("Custom Rules Integration Tests", () => {
       rules,
       plugins: {
         "@typescript-eslint": typescriptPlugin,
+        "@reasonabletech": reasonableTechEslintPlugin,
       },
       languageOptions: {
         parser: typescriptParser,
@@ -653,6 +627,9 @@ describe("Custom Rules Integration Tests", () => {
 
     const config: Linter.Config = {
       rules,
+      plugins: {
+        "@reasonabletech": reasonableTechEslintPlugin,
+      },
       languageOptions: {
         ecmaVersion: 2022,
         sourceType: "module",
@@ -730,6 +707,9 @@ describe("Custom Rules Integration Tests", () => {
 
     const config: Linter.Config = {
       rules,
+      plugins: {
+        "@reasonabletech": reasonableTechEslintPlugin,
+      },
       languageOptions: {
         parser: typescriptParser,
         ecmaVersion: 2022,

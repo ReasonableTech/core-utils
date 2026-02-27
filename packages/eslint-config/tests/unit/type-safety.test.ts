@@ -19,7 +19,7 @@ describe("createNoAnyRules", () => {
     const rules = createNoAnyRules();
 
     expect(rules).toHaveProperty("@typescript-eslint/no-explicit-any");
-    expect(rules).toHaveProperty("no-restricted-syntax");
+    expect(rules).toHaveProperty("@reasonabletech/no-as-any");
   });
 });
 
@@ -28,7 +28,7 @@ describe("createTypeSafetyRules", () => {
     const rules = createTypeSafetyRules();
 
     expect(rules).toHaveProperty("@typescript-eslint/no-explicit-any");
-    expect(rules).toHaveProperty("no-restricted-syntax");
+    expect(rules).toHaveProperty("@reasonabletech/no-as-any");
   });
 
   it("should accept custom configuration", () => {
@@ -64,7 +64,7 @@ describe("createPlatformTypeSafetyRules", () => {
     const rules = createPlatformTypeSafetyRules();
 
     expect(rules).toHaveProperty("@typescript-eslint/no-explicit-any");
-    expect(rules).toHaveProperty("no-restricted-syntax");
+    expect(rules).toHaveProperty("@reasonabletech/no-as-any");
     expect(Object.keys(rules).length).toBeGreaterThan(0);
   });
 });

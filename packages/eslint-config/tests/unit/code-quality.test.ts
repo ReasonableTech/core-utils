@@ -20,7 +20,7 @@ describe("createBarrelExportRules", () => {
   it("should produce a non-empty rule configuration", () => {
     const rules = createBarrelExportRules();
 
-    expect(rules).toHaveProperty("no-restricted-syntax");
+    expect(rules).toHaveProperty("@reasonabletech/no-barrel-exports");
   });
 });
 
@@ -28,7 +28,7 @@ describe("createCodeQualityRules", () => {
   it("should combine all code quality rules", () => {
     const rules = createCodeQualityRules();
 
-    expect(rules).toHaveProperty("no-restricted-syntax");
+    expect(rules).toHaveProperty("@reasonabletech/no-barrel-exports");
     expect(rules).toHaveProperty("@typescript-eslint/no-misused-promises");
   });
 
@@ -79,7 +79,7 @@ describe("createPlatformCodeQualityRules", () => {
   it("should produce a non-empty platform-specific preset", () => {
     const rules = createPlatformCodeQualityRules();
 
-    expect(rules).toHaveProperty("no-restricted-syntax");
+    expect(rules).toHaveProperty("@reasonabletech/no-barrel-exports");
     expect(rules).toHaveProperty("@typescript-eslint/no-misused-promises");
   });
 });
