@@ -41,7 +41,7 @@
     "node": ">=22"
   },
   "lint-staged": {
-    "*.{ts,tsx,mjs}": [
+    "packages/**/*.{ts,tsx,mjs}": [
       "eslint --fix"
     ],
     "*.{ts,tsx,md,json,mjs}": [
