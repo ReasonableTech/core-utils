@@ -30,6 +30,7 @@
     "@commitlint/cli": "^20.4.2",
     "@commitlint/config-conventional": "^20.4.2",
     "conventional-commits-parser": "6.2.1",
+    "eslint": "10.0.2",
     "lint-staged": "^16.2.7",
     "prettier": "^3.8.1",
     "turbo": "^2.8.11",

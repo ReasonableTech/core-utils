@@ -6,7 +6,11 @@
  * projects with configurable documentation references.
  */
 
-import { AST_NODE_TYPES, ESLintUtils, type TSESTree } from "@typescript-eslint/utils";
+import {
+  AST_NODE_TYPES,
+  ESLintUtils,
+  type TSESTree,
+} from "@typescript-eslint/utils";
 import type { Linter } from "eslint";
 import { mergeRuleConfigurations } from "./utils.js";
 
@@ -79,6 +83,8 @@ export const noErrorMessageParsingRule = ESLintUtils.RuleCreator(
     /**
      * Checks if a MemberExpression's object ends with `.message`
      * (i.e. `<something>.message`).
+     * @param node The member expression node to check
+     * @returns Whether the node accesses a `.message` property
      */
     function isMessageAccess(node: TSESTree.MemberExpression): boolean {
       return (
@@ -265,19 +271,21 @@ export const noInlineErrorUnionsRule = ESLintUtils.RuleCreator(
   },
   defaultOptions: [{ resultTypeName: "Result" }],
   create(context) {
-    const resultTypeName = context.options[0]?.resultTypeName ?? "Result";
+    const resultTypeName = context.options[0].resultTypeName;
 
     /**
      * Checks if a TSUnionType contains at least one TSLiteralType member.
+     * @param union The union type node to inspect
+     * @returns Whether the union contains a literal type member
      */
     function hasLiteralMember(union: TSESTree.TSUnionType): boolean {
-      return union.types.some(
-        (t) => t.type === AST_NODE_TYPES.TSLiteralType,
-      );
+      return union.types.some((t) => t.type === AST_NODE_TYPES.TSLiteralType);
     }
 
     /**
      * Checks if a TSTypeReference refers to the configured Result type name.
+     * @param node The type reference node to check
+     * @returns Whether the node references the Result type
      */
     function isResultReference(node: TSESTree.TSTypeReference): boolean {
       return (
@@ -289,6 +297,8 @@ export const noInlineErrorUnionsRule = ESLintUtils.RuleCreator(
     /**
      * Walks TSUnionType nodes that are descendants of a given type parameter
      * list, returning any that contain literal members.
+     * @param params The type parameter instantiation to search
+     * @returns Array of union type nodes containing literal members
      */
     function findInlineUnions(
       params: TSESTree.TSTypeParameterInstantiation,
@@ -350,13 +360,9 @@ export const noInlineErrorUnionsRule = ESLintUtils.RuleCreator(
         // a Promise<...>, display "Promise<Result<T, E>>".
         let displayName = resultTypeName;
         const parentRef = node.parent;
-        if (
-          parentRef !== undefined &&
-          parentRef.type === AST_NODE_TYPES.TSTypeParameterInstantiation
-        ) {
+        if (parentRef.type === AST_NODE_TYPES.TSTypeParameterInstantiation) {
           const grandparent = parentRef.parent;
           if (
-            grandparent !== undefined &&
             grandparent.type === AST_NODE_TYPES.TSTypeReference &&
             grandparent.typeName.type === AST_NODE_TYPES.Identifier &&
             grandparent.typeName.name === "Promise"

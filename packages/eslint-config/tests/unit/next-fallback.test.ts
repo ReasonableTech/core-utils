@@ -11,7 +11,15 @@
  * mocking node:module which affects the entire test file.
  */
 
-import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from "vitest";
 
 const previousNodeEnv = process.env.NODE_ENV;
 
@@ -115,7 +123,7 @@ describe("loadNextjsConfigs fallback scenarios", () => {
     // Throw a non-Error value (string) to cover the false branch of
     // `error instanceof Error ? error.message : error`
     mockCreateRequire.mockImplementation(() => {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error, no-throw-literal -- intentionally throwing non-Error to test error handling branch
+      // eslint-disable-next-line @typescript-eslint/only-throw-error -- intentionally throwing non-Error to test error handling branch
       throw "module not available";
     });
 

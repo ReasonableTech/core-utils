@@ -5,7 +5,11 @@
  * patterns, particularly around Result types and type assertions.
  */
 
-import { AST_NODE_TYPES, ESLintUtils, type TSESTree } from "@typescript-eslint/utils";
+import {
+  AST_NODE_TYPES,
+  ESLintUtils,
+  type TSESTree,
+} from "@typescript-eslint/utils";
 import type { Linter } from "eslint";
 import { mergeRuleConfigurations } from "./utils.js";
 
@@ -56,6 +60,7 @@ export const noAsAnyRule = ESLintUtils.RuleCreator(
     /**
      * Checks whether a TSAnyKeyword is a direct child of a TSAsExpression
      * and, if so, whether the cast is part of a double-cast pattern.
+     * @param node The TSAsExpression node to check
      */
     function checkAsExpression(node: TSESTree.TSAsExpression): void {
       if (node.typeAnnotation.type !== AST_NODE_TYPES.TSAnyKeyword) {
@@ -66,7 +71,6 @@ export const noAsAnyRule = ESLintUtils.RuleCreator(
       // inside an outer TSAsExpression.
       const parent = node.parent;
       if (
-        parent !== undefined &&
         parent.type === AST_NODE_TYPES.TSAsExpression &&
         parent.expression === node
       ) {
@@ -79,6 +83,7 @@ export const noAsAnyRule = ESLintUtils.RuleCreator(
 
     /**
      * Checks whether a TSTypeAssertion (angle-bracket syntax) casts to any.
+     * @param node The TSTypeAssertion node to check
      */
     function checkTypeAssertion(node: TSESTree.TSTypeAssertion): void {
       if (node.typeAnnotation.type !== AST_NODE_TYPES.TSAnyKeyword) {

@@ -103,22 +103,18 @@ export {
 import type { Linter } from "eslint";
 import {
   createErrorHandlingRules,
-  createPlatformErrorHandlingRules,
   type ErrorHandlingRuleOptions,
 } from "./error-handling.js";
 import {
   createArchitecturePatternRules,
-  createPlatformArchitecturePatternRules,
   type ArchitecturePatternRuleOptions,
 } from "./architecture-patterns.js";
 import {
   createTypeSafetyRules,
-  createPlatformTypeSafetyRules,
   type TypeSafetyRuleOptions,
 } from "./type-safety.js";
 import {
   createCodeQualityRules,
-  createPlatformCodeQualityRules,
   type NoLinterDisablingOptions,
 } from "./code-quality.js";
 import { mergeRuleConfigurations } from "./utils.js";
