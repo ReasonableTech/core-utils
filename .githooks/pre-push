@@ -1,0 +1,38 @@
+#!/bin/sh
+
+# Read push details from stdin (local_ref local_sha remote_ref remote_sha)
+while read -r local_ref local_sha remote_ref remote_sha; do
+  # Skip branch deletions
+  if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+    continue
+  fi
+
+  # Determine the range of commits being pushed
+  if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+    # New branch — diff against the merge base with the default branch
+    range="$(git merge-base HEAD origin/main)..${local_sha}"
+  else
+    range="${remote_sha}..${local_sha}"
+  fi
+
+  # Find all files changed in the push range
+  changed=$(git diff --name-only "$range")
+  if [ -z "$changed" ]; then
+    continue
+  fi
+
+  # Detect affected packages and run tests
+  affected_packages=""
+  for pkg_dir in packages/*/; do
+    pkg_name=$(node -p "require('./${pkg_dir}package.json').name" 2>/dev/null)
+    if [ -z "$pkg_name" ]; then continue; fi
+    if echo "$changed" | grep -q "^${pkg_dir}"; then
+      affected_packages="$affected_packages --filter=$pkg_name"
+    fi
+  done
+
+  if [ -n "$affected_packages" ]; then
+    echo "Running tests for affected packages..."
+    pnpm $affected_packages test || exit 1
+  fi
+done

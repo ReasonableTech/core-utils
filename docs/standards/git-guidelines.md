@@ -82,6 +82,19 @@ The lint-staged configuration is defined in the root `package.json`:
 - `*.{ts,tsx,mjs}` — ESLint with autofix
 - `*.{ts,tsx,md,json,mjs}` — Prettier with autofix
 
+### Pre-push Hook
+
+**Source of truth**: `.githooks/pre-push`
+
+Runs automatically before pushing to a remote. The hook:
+
+1. Determines the range of commits being pushed (compared to the remote ref)
+2. Finds all files changed across those commits
+3. Detects which packages are affected
+4. Runs `pnpm --filter=<pkg> test` for each affected package
+
+If any tests fail, the push is blocked. Skipped when no package files are changed (e.g., root-only changes) or when deleting a remote branch.
+
 ### Commit-msg Hook
 
 **Source of truth**: `.githooks/commit-msg`
