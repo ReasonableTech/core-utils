@@ -22,6 +22,7 @@ import eslintConfigPrettier from "eslint-config-prettier";
 import jsdoc from "eslint-plugin-jsdoc";
 import { configs as tsConfigs } from "typescript-eslint";
 import type { Linter } from "eslint";
+import { defineConfig, globalIgnores } from "eslint/config";
 
 import { reasonableTechPlugin } from "./plugin.js";
 import { sharedIgnores } from "./shared-ignores.js";
@@ -61,8 +62,10 @@ import { createNoTypeofInExpectRules } from "./custom-rules/test-quality.js";
  * ];
  * ```
  */
-export function createTypeAwareBaseConfig(projectDir: string): Linter.Config[] {
-  return [
+export function createTypeAwareBaseConfig(
+  projectDir: string,
+): Linter.Config[] {
+  return defineConfig(
     js.configs.recommended,
     eslintConfigPrettier,
     jsdoc.configs["flat/recommended-typescript"],
@@ -81,7 +84,14 @@ export function createTypeAwareBaseConfig(projectDir: string): Linter.Config[] {
     },
     {
       plugins: {
-        "@reasonabletech": reasonableTechPlugin,
+        // Cast required: typescript-eslint's RuleModule types are structurally
+        // incompatible with @eslint/core's Plugin type used by defineConfig().
+        // The plugin works correctly at runtime; this is purely a type mismatch
+        // between the two type ecosystems.
+        "@reasonabletech": reasonableTechPlugin as unknown as Record<
+          string,
+          unknown
+        >,
       },
     },
     {
@@ -90,9 +100,7 @@ export function createTypeAwareBaseConfig(projectDir: string): Linter.Config[] {
         reportUnusedDisableDirectives: "error",
       },
     },
-    {
-      ignores: [...sharedIgnores, "**/*.mjs", "**/vitest.config.mts"],
-    },
+    globalIgnores([...sharedIgnores, "**/*.mjs", "**/vitest.config.mts"]),
     {
       rules: {
         ...baseRules,
@@ -112,5 +120,5 @@ export function createTypeAwareBaseConfig(projectDir: string): Linter.Config[] {
       ],
       rules: createNoTypeofInExpectRules(),
     },
-  ] as Linter.Config[];
+  ) as Linter.Config[];
 }

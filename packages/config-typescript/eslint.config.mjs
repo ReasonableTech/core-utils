@@ -1,3 +1,4 @@
+import { defineConfig } from "eslint/config";
 import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
-export default createTypeAwareConfig(import.meta.dirname);
+export default defineConfig(...createTypeAwareConfig(import.meta.dirname));

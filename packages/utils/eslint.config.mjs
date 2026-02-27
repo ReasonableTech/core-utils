@@ -1,6 +1,7 @@
+import { defineConfig } from "eslint/config";
 import { createTypeAwareConfig } from "@reasonabletech/eslint-config";
 
-export default [
+export default defineConfig(
   ...createTypeAwareConfig(import.meta.dirname),
   {
     // retry.ts intentionally uses sequential awaits inside loops for
@@ -10,4 +11,4 @@ export default [
       "no-await-in-loop": "off",
     },
   },
-];
+);
