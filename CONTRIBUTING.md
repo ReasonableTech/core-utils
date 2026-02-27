@@ -31,7 +31,7 @@ See the [README](./README.md) for prerequisites, installation, and available com
 
 ### Code Style and Testing
 
-- Follow existing patterns; run `pnpm quality` before submitting.
+- Follow existing patterns; run `pnpm verify` before submitting.
 - See [docs/standards/](./docs/standards/) for TypeScript, error handling, and testing standards.
 
 ## Creating Changesets
@@ -61,14 +61,14 @@ See **[docs/standards/git-guidelines.md](./docs/standards/git-guidelines.md)** f
 ### Before Submitting
 
 1. **Open an issue first** for anything beyond a trivial fix. We'd rather discuss before you invest time.
-2. Run `pnpm quality` and ensure tests pass.
+2. Run `pnpm verify` and ensure all checks pass.
 3. Add a changeset if needed (see [Creating Changesets](#creating-changesets)).
 4. Write clear commit messages following [Commit Conventions](#commit-conventions).
 
 ### PR Requirements
 
 - **Title**: Follow Conventional Commits format (e.g., `feat(eslint-config): add React rules`).
-- **Description**: Explain what the PR does and why *we* would want it.
+- **Description**: Explain what the PR does and why _we_ would want it.
 - **Tests**: Include tests for new functionality.
 - **Changeset**: Include if the change affects published packages.
 

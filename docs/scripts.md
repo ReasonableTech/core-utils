@@ -4,17 +4,17 @@ This document explains all npm scripts in the root `package.json`.
 
 ## Quick Reference
 
-| Script | Purpose |
-|--------|---------|
-| `pnpm bootstrap` | First-time setup |
-| `pnpm dev` | Development mode |
-| `pnpm build` | Build all packages |
-| `pnpm test` | Run all tests |
-| `pnpm lint` | Lint all packages |
-| `pnpm typecheck` | Type-check all packages |
-| `pnpm quality` | Run lint + typecheck + build |
-| `pnpm format` | Format all files with Prettier |
-| `pnpm clean` | Remove build artifacts |
+| Script           | Purpose                             |
+| ---------------- | ----------------------------------- |
+| `pnpm bootstrap` | First-time setup                    |
+| `pnpm dev`       | Development mode                    |
+| `pnpm build`     | Build all packages                  |
+| `pnpm test`      | Run all tests                       |
+| `pnpm lint`      | Lint all packages                   |
+| `pnpm typecheck` | Type-check all packages             |
+| `pnpm verify`    | Run lint + typecheck + test + build |
+| `pnpm format`    | Format all files with Prettier      |
+| `pnpm clean`     | Remove build artifacts              |
 
 ---
 
@@ -134,18 +134,18 @@ pnpm test:coverage
 
 Generates coverage reports in `generated/test-coverage/`.
 
-### `pnpm quality`
+### `pnpm verify`
 
-**Run lint, typecheck, and build together.**
+**Run lint, typecheck, test, and build together.**
 
 ```bash
-pnpm quality
+pnpm verify
 ```
 
 Equivalent to:
 
 ```bash
-pnpm turbo run lint typecheck build --continue
+pnpm turbo run typecheck lint test build --continue
 ```
 
 The `--continue` flag runs all tasks even if one fails, so you see all errors at once.
@@ -220,15 +220,15 @@ Sets `core.hooksPath` to `.githooks/` so commitlint runs on commits.
 
 Each package has its own scripts. Common patterns:
 
-| Script | Purpose |
-|--------|---------|
-| `build` | Build the package |
-| `dev` | Watch mode |
-| `test` | Run tests |
+| Script          | Purpose             |
+| --------------- | ------------------- |
+| `build`         | Build the package   |
+| `dev`           | Watch mode          |
+| `test`          | Run tests           |
 | `test:coverage` | Tests with coverage |
-| `lint` | Lint the package |
-| `typecheck` | Type-check |
-| `clean` | Remove artifacts |
+| `lint`          | Lint the package    |
+| `typecheck`     | Type-check          |
+| `clean`         | Remove artifacts    |
 
 ### Running Package Scripts
 

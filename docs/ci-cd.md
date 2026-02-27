@@ -4,10 +4,10 @@ This document describes the GitHub Actions workflows for core-utils.
 
 ## Workflows
 
-| Workflow | File | Triggers | Purpose |
-|----------|------|----------|---------|
-| CI | `ci.yml` | Push, PR | Validate changes |
-| Release | `release.yml` | Push to main | Publish packages |
+| Workflow | File          | Triggers     | Purpose          |
+| -------- | ------------- | ------------ | ---------------- |
+| CI       | `ci.yml`      | Push, PR     | Validate changes |
+| Release  | `release.yml` | Push to main | Publish packages |
 
 ---
 
@@ -120,10 +120,10 @@ Consumers can verify package origin on npmjs.com.
 
 ## Required Repository Configuration
 
-| Key | Type | Purpose |
-|-----|------|---------|
-| `TURBO_TOKEN` | Secret | Turbo remote cache token for CI |
-| `TURBO_TEAM` | Variable (preferred) or Secret | Turbo team slug for remote cache |
+| Key           | Type                           | Purpose                          |
+| ------------- | ------------------------------ | -------------------------------- |
+| `TURBO_TOKEN` | Secret                         | Turbo remote cache token for CI  |
+| `TURBO_TEAM`  | Variable (preferred) or Secret | Turbo team slug for remote cache |
 
 ## Trusted Publishing Setup (npm)
 
@@ -146,7 +146,7 @@ Before pushing, run the same checks CI runs:
 
 ```bash
 # Full CI simulation
-pnpm quality && pnpm test
+pnpm verify
 
 # Or step by step
 pnpm lint

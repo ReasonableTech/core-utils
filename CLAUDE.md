@@ -27,8 +27,7 @@ For staging safety, atomic workflow patterns, and git hook details, see [git gui
 Before committing, run quality checks for the packages you touched:
 
 ```bash
-pnpm quality          # lint + typecheck + build (all packages)
-pnpm test             # run all tests
+pnpm verify           # lint + typecheck + test + build (all packages)
 ```
 
 For targeted checks on a single package:

@@ -54,4 +54,4 @@ Use this checklist when adding a new package to the core-utils monorepo.
 - [ ] Add to `.changeset/config.json` linked packages (if config package)
 - [ ] Add to root README.md package index
 - [ ] Run `pnpm install` to link workspace
-- [ ] Run `pnpm quality` to verify setup
+- [ ] Run `pnpm verify` to verify setup

@@ -8,14 +8,14 @@ Shared engineering configuration and utility packages published by ReasonableTec
 
 ## Packages
 
-| Package | Description | Links |
-| ------- | ----------- | ----- |
-| `@reasonabletech/config-typescript` | `tsconfig` presets for apps, libraries, and tooling | [README](./packages/config-typescript/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-typescript) |
-| `@reasonabletech/config-tsup` | `tsup` build configuration factories | [README](./packages/config-tsup/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-tsup) |
-| `@reasonabletech/config-vitest` | Vitest configuration factories with coverage defaults | [README](./packages/config-vitest/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-vitest) |
-| `@reasonabletech/eslint-config` | ESLint flat-config factories and custom rules for TypeScript, React, and Next.js | [README](./packages/eslint-config/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/eslint-config) |
-| `@reasonabletech/config-playwright` | Playwright configuration factories for single-app and cross-app test suites | [README](./packages/config-playwright/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-playwright) |
-| `@reasonabletech/utils` | Runtime utilities: Result types, datetime, object helpers, retry, async pipelines | [README](./packages/utils/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/utils) |
+| Package                             | Description                                                                       | Links                                                                                                                     |
+| ----------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `@reasonabletech/config-typescript` | `tsconfig` presets for apps, libraries, and tooling                               | [README](./packages/config-typescript/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-typescript) |
+| `@reasonabletech/config-tsup`       | `tsup` build configuration factories                                              | [README](./packages/config-tsup/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-tsup)             |
+| `@reasonabletech/config-vitest`     | Vitest configuration factories with coverage defaults                             | [README](./packages/config-vitest/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-vitest)         |
+| `@reasonabletech/eslint-config`     | ESLint flat-config factories and custom rules for TypeScript, React, and Next.js  | [README](./packages/eslint-config/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/eslint-config)         |
+| `@reasonabletech/config-playwright` | Playwright configuration factories for single-app and cross-app test suites       | [README](./packages/config-playwright/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/config-playwright) |
+| `@reasonabletech/utils`             | Runtime utilities: Result types, datetime, object helpers, retry, async pipelines | [README](./packages/utils/README.md) · [npm](https://www.npmjs.com/package/@reasonabletech/utils)                         |
 
 > [!NOTE]
 > **ReasonableTech developers:** These packages are part of our shared engineering standards. See [docs/standards/README.md](./docs/standards/README.md) for TypeScript, error handling, testing, and architecture guidelines that apply when working with this toolchain.
@@ -94,7 +94,7 @@ pnpm bootstrap
 
 - `pnpm build` — Build all packages
 - `pnpm test` — Run all test suites
-- `pnpm quality` — Lint, typecheck, and build together
+- `pnpm verify` — Lint, typecheck, test, and build together
 - `pnpm format` — Format with Prettier
 
 See [docs/scripts.md](./docs/scripts.md) for the full script reference.

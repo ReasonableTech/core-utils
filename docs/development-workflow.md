@@ -48,8 +48,8 @@ Run tests and quality checks. Fix failures. Repeat.
 # Run tests for the touched package
 pnpm --filter=@reasonabletech/<package> test
 
-# Run full quality gates (lint + typecheck + build)
-pnpm quality
+# Run full quality gates (lint + typecheck + test + build)
+pnpm verify
 
 # Or target a single package
 pnpm --filter=@reasonabletech/<package> typecheck
