@@ -53,18 +53,6 @@ export const baseRules: Linter.RulesRecord = {
       markers: ["/"], // Allow /// for TypeScript triple-slash directives
     },
   ],
-
-  // Layout & Formatting (handled by Prettier mostly)
-  "max-len": [
-    "error",
-    {
-      code: 100,
-      ignoreComments: true,
-      ignoreUrls: true,
-      ignoreStrings: true,
-      ignoreTemplateLiterals: true,
-    },
-  ],
 };
 
 /**
