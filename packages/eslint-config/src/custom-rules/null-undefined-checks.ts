@@ -125,7 +125,7 @@ export const noNullUndefinedChecksRule = ESLintUtils.RuleCreator(
     },
     messages: {
       checksBoth:
-        "Checking for both null and undefined is likely a type mismatch. null and undefined are different types in TypeScript. Check your type union - you should only check for what's actually in the type.",
+        "Checking for both null and undefined suggests a type mismatch. Simplify the type: use `T | null` for nullable values, or `T | undefined` for optional values. If both are genuinely in the type, use `x == null` which covers both in a single check.",
     },
     schema: [],
   },
