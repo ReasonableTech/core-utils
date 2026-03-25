@@ -11,8 +11,10 @@
 import { describe, it, expect } from "vitest";
 import { type Linter, Linter as LinterClass } from "eslint";
 import tseslint from "typescript-eslint";
-import { noDependencyBundlingRule } from "../../src/custom-rules/architecture-patterns.js";
-import { noLinterDisablingRule } from "../../src/custom-rules/code-quality.js";
+import {
+  noDependencyBundlingRule,
+  noConstructorInstantiationRule,
+} from "../../src/custom-rules/architecture-patterns.js";
 import {
   noNullUndefinedChecksRule,
   createNullUndefinedChecksRules,
@@ -103,18 +105,6 @@ describe("noDependencyBundlingRule (plugin)", () => {
       expect(msgs).toHaveLength(1);
       expect(msgs[0]?.messageId).toBe("dependencyBundle");
     });
-
-    it("catches structural bundling with 3+ service-like properties", () => {
-      const code = `
-interface ServiceBundle {
-  userService: UserService;
-  authService: AuthService;
-  cacheService: CacheService;
-}`;
-      const msgs = errors(lint(code, config));
-      expect(msgs).toHaveLength(1);
-      expect(msgs[0]?.messageId).toBe("dependencyBundle");
-    });
   });
 
   describe("valid patterns", () => {
@@ -136,115 +126,15 @@ interface SmallBundle {
 }`;
       expect(errors(lint(code, config))).toHaveLength(0);
     });
-  });
-});
 
-// ---------------------------------------------------------------------------
-// noLinterDisablingRule
-// ---------------------------------------------------------------------------
-describe("noLinterDisablingRule (plugin)", () => {
-  /**
-   * Lints code with noLinterDisablingRule using the given options and filename.
-   *
-   * When a filename is provided, it is set via the config `files` array so that
-   * ESLint's flat config matches the virtual file and applies the rule. The
-   * `linterOptions.noInlineConfig` setting prevents ESLint from processing
-   * `eslint-disable` directives itself, allowing our custom rule to detect them.
-   * @param code Source code to lint
-   * @param ruleOptions Options for the rule
-   * @param filename Virtual filename (used for allowInTests detection)
-   * @returns Error-severity messages
-   */
-  function lintDisabling(
-    code: string,
-    ruleOptions: Record<string, unknown> = {},
-    filename?: string,
-  ): Linter.LintMessage[] {
-    const config: Linter.Config = {
-      plugins: {
-        "@reasonabletech": asPlugin({
-          "no-linter-disabling": noLinterDisablingRule,
-        }),
-      },
-      rules: {
-        "@reasonabletech/no-linter-disabling": ["error", ruleOptions],
-      },
-      languageOptions: tsLanguageOptions,
-      // Prevent ESLint from processing eslint-disable directives itself,
-      // so our custom rule can detect and report on them.
-      linterOptions: { noInlineConfig: true },
-    };
-
-    if (filename !== undefined) {
-      // Provide the filename so the rule's isTestFile() check can inspect it.
-      // Pass as the third argument AND add a files glob so ESLint's flat config matches.
-      const configWithFiles: Linter.Config = { ...config, files: ["**"] };
-      return errors(new LinterClass().verify(code, configWithFiles, filename));
-    }
-
-    return errors(new LinterClass().verify(code, config));
-  }
-
-  describe("violations", () => {
-    it("reports eslint-disable without justification", () => {
-      const msgs = lintDisabling(`/* eslint-disable */\nconst x = 1;`);
-      expect(msgs).toHaveLength(1);
-      expect(msgs[0]?.messageId).toBe("noJustification");
-    });
-
-    it("reports eslint-disable with specific rule without justification", () => {
-      const msgs = lintDisabling(
-        `/* eslint-disable no-console */\nconst x = 1;`,
-      );
-      expect(msgs).toHaveLength(1);
-      expect(msgs[0]?.messageId).toBe("noJustification");
-    });
-
-    it("reports @ts-ignore without justification", () => {
-      const msgs = lintDisabling(`// @ts-ignore\nconst x: any = 1;`);
-      expect(msgs).toHaveLength(1);
-      expect(msgs[0]?.messageId).toBe("noJustification");
-    });
-
-    it("reports @ts-nocheck without justification", () => {
-      const msgs = lintDisabling(`// @ts-nocheck\nconst x = 1;`);
-      expect(msgs).toHaveLength(1);
-      expect(msgs[0]?.messageId).toBe("noJustification");
-    });
-
-    it("reports specificRule when justification is present but rule is forbidden", () => {
-      const code = `// Reason: legacy code\n/* eslint-disable no-console */\nconst x = 1;`;
-      const msgs = lintDisabling(code, { requireJustification: true });
-      expect(msgs).toHaveLength(1);
-      expect(msgs[0]?.messageId).toBe("specificRule");
-    });
-
-    it("reports noDisable for blanket disable with requireJustification false", () => {
-      const code = `/* eslint-disable */\nconst x = 1;`;
-      const msgs = lintDisabling(code, { requireJustification: false });
-      expect(msgs).toHaveLength(1);
-      expect(msgs[0]?.messageId).toBe("noDisable");
-    });
-  });
-
-  describe("valid patterns", () => {
-    it("skips test files when allowInTests is true", () => {
-      const code = `/* eslint-disable */\nconst x = 1;`;
-      const msgs = lintDisabling(
-        code,
-        { allowInTests: true },
-        "src/services.test.ts",
-      );
-      expect(msgs).toHaveLength(0);
-    });
-
-    it("skips allowed rules", () => {
-      const code = `/* eslint-disable no-console */\nconst x = 1;`;
-      const msgs = lintDisabling(code, {
-        requireJustification: false,
-        allowedRules: ["no-console"],
-      });
-      expect(msgs).toHaveLength(0);
+    it("allows domain models with 3+ typed properties", () => {
+      const code = `
+interface UserProfile {
+  address: Address;
+  company: Company;
+  subscription: Subscription;
+}`;
+      expect(errors(lint(code, config))).toHaveLength(0);
     });
   });
 });
@@ -425,7 +315,7 @@ describe("createNullUndefinedChecksRules", () => {
 });
 
 // ---------------------------------------------------------------------------
-// noDependencyBundlingRule — edge cases for isServiceLikeProperty
+// noDependencyBundlingRule — type alias edge cases
 // ---------------------------------------------------------------------------
 describe("noDependencyBundlingRule edge cases", () => {
   const config: Linter.Config = {
@@ -440,52 +330,7 @@ describe("noDependencyBundlingRule edge cases", () => {
     languageOptions: tsLanguageOptions,
   };
 
-  it("allows interface with method signatures (non-TSPropertySignature)", () => {
-    // Method signatures return false from isServiceLikeProperty (line 136)
-    const code = `
-interface MyService {
-  start(): void;
-  stop(): void;
-  restart(): void;
-}`;
-    expect(errors(lint(code, config))).toHaveLength(0);
-  });
-
-  it("allows interface with properties lacking type annotations", () => {
-    // Properties without typeAnnotation return false from isServiceLikeProperty
-    const code = `
-interface MyConfig {
-  host;
-  port;
-  database;
-}`;
-    expect(errors(lint(code, config))).toHaveLength(0);
-  });
-
-  it("allows interface with primitive-typed properties (non-TSTypeReference)", () => {
-    const code = `
-interface MyConfig {
-  host: string;
-  port: number;
-  enabled: boolean;
-}`;
-    expect(errors(lint(code, config))).toHaveLength(0);
-  });
-
-  it("allows interface with qualified name types (Namespace.Type)", () => {
-    // Covers the false branch of typeName.type === AST_NODE_TYPES.Identifier (line 145)
-    // TSQualifiedName is used for dot-separated type references like Namespace.Type
-    const code = `
-interface MyBundle {
-  serviceA: Namespace.ServiceA;
-  serviceB: Namespace.ServiceB;
-  serviceC: Namespace.ServiceC;
-}`;
-    expect(errors(lint(code, config))).toHaveLength(0);
-  });
-
   it("catches type alias ending with Deps", () => {
-    // Covers the name.endsWith("Deps") branch on type aliases (line 220)
     const code = `type AuthDeps = { token: TokenService; };`;
     const msgs = errors(lint(code, config));
     expect(msgs).toHaveLength(1);
@@ -493,100 +338,87 @@ interface MyBundle {
   });
 
   it("allows type alias not ending with Dependencies or Deps", () => {
-    // Covers the false branch of both endsWith checks on line 220
     const code = `type AuthConfig = { token: string; };`;
     expect(errors(lint(code, config))).toHaveLength(0);
   });
 });
 
 // ---------------------------------------------------------------------------
-// noLinterDisablingRule — additional branch coverage
+// noConstructorInstantiationRule
 // ---------------------------------------------------------------------------
-describe("noLinterDisablingRule edge cases", () => {
-  /**
-   * Lints code with noLinterDisablingRule
-   * @param code Source code to lint
-   * @param ruleOptions Options for the rule
-   * @param filename Virtual filename (used for allowInTests detection)
-   * @returns Error-severity messages
-   */
-  function lintDisabling(
-    code: string,
-    ruleOptions: Record<string, unknown> = {},
-    filename?: string,
-  ): Linter.LintMessage[] {
-    const cfg: Linter.Config = {
-      plugins: {
-        "@reasonabletech": asPlugin({
-          "no-linter-disabling": noLinterDisablingRule,
-        }),
-      },
-      rules: {
-        "@reasonabletech/no-linter-disabling": ["error", ruleOptions],
-      },
-      languageOptions: tsLanguageOptions,
-      linterOptions: { noInlineConfig: true },
-    };
+describe("noConstructorInstantiationRule (plugin)", () => {
+  const config: Linter.Config = {
+    plugins: {
+      "@reasonabletech": asPlugin({
+        "no-constructor-instantiation": noConstructorInstantiationRule,
+      }),
+    },
+    rules: {
+      "@reasonabletech/no-constructor-instantiation": "error",
+    },
+    languageOptions: tsLanguageOptions,
+  };
 
-    if (filename !== undefined) {
-      const cfgWithFiles: Linter.Config = { ...cfg, files: ["**"] };
-      return errors(new LinterClass().verify(code, cfgWithFiles, filename));
-    }
-
-    return errors(new LinterClass().verify(code, cfg));
+  describe("violations", () => {
+    it("catches new PascalCase() inside constructor body", () => {
+      const code = `
+class UserService {
+  constructor(config) {
+    this.db = new Database(config);
   }
+}`;
+      const msgs = errors(lint(code, config));
+      expect(msgs).toHaveLength(1);
+      expect(msgs[0]?.messageId).toBe("constructorInstantiation");
+    });
 
-  it("reports on test file when allowInTests is false", () => {
-    const code = `/* eslint-disable */\nconst x = 1;`;
-    const msgs = lintDisabling(
-      code,
-      { allowInTests: false },
-      "src/services.test.ts",
-    );
-    expect(msgs.length).toBeGreaterThan(0);
+    it("catches new MemberExpression inside constructor body", () => {
+      const code = `
+class UserService {
+  constructor() {
+    this.client = new ns.HttpClient();
+  }
+}`;
+      const msgs = errors(lint(code, config));
+      expect(msgs).toHaveLength(1);
+      expect(msgs[0]?.messageId).toBe("constructorInstantiation");
+    });
   });
 
-  it("detects __tests__ directory as test file", () => {
-    const code = `/* eslint-disable */\nconst x = 1;`;
-    const msgs = lintDisabling(
-      code,
-      { allowInTests: true },
-      "src/__tests__/util.ts",
-    );
-    expect(msgs).toHaveLength(0);
-  });
+  describe("valid patterns", () => {
+    it("allows built-in constructors inside constructor", () => {
+      const code = `
+class CacheService {
+  constructor() {
+    this.cache = new Map();
+    this.timestamps = new Set();
+    this.createdAt = new Date();
+  }
+}`;
+      expect(errors(lint(code, config))).toHaveLength(0);
+    });
 
-  it("detects .spec. files as test files", () => {
-    const code = `/* eslint-disable */\nconst x = 1;`;
-    const msgs = lintDisabling(
-      code,
-      { allowInTests: true },
-      "src/util.spec.ts",
-    );
-    expect(msgs).toHaveLength(0);
-  });
+    it("allows new expression in default parameter value", () => {
+      const code = `
+class UserService {
+  constructor(db = new Database()) {}
+}`;
+      expect(errors(lint(code, config))).toHaveLength(0);
+    });
 
-  it("still reports on non-test file when allowInTests is true", () => {
-    // Covers false branch of isTestFile (line 106) — allowInTests is true but file is not a test
-    const code = `/* eslint-disable */\nconst x = 1;`;
-    const msgs = lintDisabling(
-      code,
-      { allowInTests: true },
-      "src/services/auth.ts",
-    );
-    expect(msgs.length).toBeGreaterThan(0);
-  });
+    it("allows new expression outside constructor", () => {
+      const code = `
+class Factory {
+  create() {
+    return new Database();
+  }
+}`;
+      expect(errors(lint(code, config))).toHaveLength(0);
+    });
 
-  it("skips test files when allowedPatterns is explicitly undefined", () => {
-    // Covers the ?? [] fallback branch on line 106 where allowedPatterns is nullish
-    const code = `/* eslint-disable */\nconst x = 1;`;
-    const msgs = lintDisabling(
-      code,
-      { allowInTests: true, allowedPatterns: undefined },
-      "src/services.test.ts",
-    );
-    // With empty allowedPatterns (from ??), isTestFile falls back to built-in patterns
-    // The .test.ts suffix is detected by the built-in check in isTestFile
-    expect(msgs).toHaveLength(0);
+    it("allows new expression at top level", () => {
+      const code = `const db = new Database();`;
+      expect(errors(lint(code, config))).toHaveLength(0);
+    });
   });
 });

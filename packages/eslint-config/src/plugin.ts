@@ -5,8 +5,14 @@
  * registration in flat config via `plugins: { "@reasonabletech": reasonableTechPlugin }`.
  */
 
-import { noDependencyBundlingRule } from "./custom-rules/architecture-patterns.js";
-import { noLinterDisablingRule, noBarrelExportsRule } from "./custom-rules/code-quality.js";
+import {
+  noDependencyBundlingRule,
+  noConstructorInstantiationRule,
+} from "./custom-rules/architecture-patterns.js";
+import {
+  noLinterDisablingRule,
+  noBarrelExportsRule,
+} from "./custom-rules/code-quality.js";
 import {
   noErrorMessageParsingRule,
   noInlineErrorUnionsRule,
@@ -23,6 +29,7 @@ export const reasonableTechPlugin = {
   rules: {
     "no-as-any": noAsAnyRule,
     "no-barrel-exports": noBarrelExportsRule,
+    "no-constructor-instantiation": noConstructorInstantiationRule,
     "no-dependency-bundling": noDependencyBundlingRule,
     "no-error-message-parsing": noErrorMessageParsingRule,
     "no-inline-error-unions": noInlineErrorUnionsRule,

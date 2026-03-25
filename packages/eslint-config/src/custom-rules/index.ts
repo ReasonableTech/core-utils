@@ -39,6 +39,7 @@ export {
   createDependencyInjectionRules,
   createServiceArchitectureRules,
   createPlatformArchitecturePatternRules,
+  noConstructorInstantiationRule,
   type ArchitecturePatternRuleOptions,
 } from "./architecture-patterns.js";
 
@@ -46,7 +47,6 @@ export {
 export {
   noAsAnyRule,
   createNoAnyRules,
-  createResultTypeRules,
   createTypeSafetyRules,
   createPlatformTypeSafetyRules,
   type TypeSafetyRuleOptions,
@@ -113,10 +113,7 @@ import {
   createTypeSafetyRules,
   type TypeSafetyRuleOptions,
 } from "./type-safety.js";
-import {
-  createCodeQualityRules,
-  type NoLinterDisablingOptions,
-} from "./code-quality.js";
+import { createCodeQualityRules } from "./code-quality.js";
 import { mergeRuleConfigurations } from "./utils.js";
 
 /**
@@ -129,11 +126,6 @@ export interface ReasonableTechRuleOptions {
   architecturePatterns?: Partial<ArchitecturePatternRuleOptions>;
   /** Type safety rule options */
   typeSafety?: Partial<TypeSafetyRuleOptions>;
-  /** Code quality rule options */
-  codeQuality?: {
-    linterDisabling?: NoLinterDisablingOptions;
-    barrelExports?: { allowedPatterns?: string[] };
-  };
   /** Base URL for all documentation references */
   docBaseUrl?: string;
 }
@@ -177,14 +169,12 @@ export function createReasonableTechRules(
     ...options.typeSafety,
   };
 
-  const codeQualityOptions = options.codeQuality ?? {};
-
   const errorHandlingRules = createErrorHandlingRules(errorHandlingOptions);
   const architecturePatternRules = createArchitecturePatternRules(
     architecturePatternOptions,
   );
   const typeSafetyRules = createTypeSafetyRules(typeSafetyOptions);
-  const codeQualityRules = createCodeQualityRules(codeQualityOptions);
+  const codeQualityRules = createCodeQualityRules();
 
   return mergeRuleConfigurations(
     errorHandlingRules,
@@ -215,14 +205,6 @@ export function createPlatformRulePreset(): Linter.RulesRecord {
     typeSafety: {
       docBaseUrl: "docs/standards/typescript-standards.md",
       allowInTests: false,
-    },
-    codeQuality: {
-      linterDisabling: {
-        allowInTests: true,
-        requireJustification: true,
-        allowedRules: [],
-      },
-      barrelExports: {},
     },
   });
 }

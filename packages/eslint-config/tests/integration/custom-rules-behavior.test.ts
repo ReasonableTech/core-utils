@@ -6,7 +6,6 @@
  *
  * Note: This file tests ESLint's error messages, so message parsing is legitimate here
  */
- 
 
 import { describe, it, expect } from "vitest";
 import { Linter } from "eslint";
@@ -19,6 +18,7 @@ import {
   createPlatformConventionRules,
   createTypeSafetyRules,
 } from "../../src/custom-rules/index.js";
+import { noConstructorInstantiationRule } from "../../src/custom-rules/architecture-patterns.js";
 import {
   createBarrelExportRules,
   createTerminologyRules,
@@ -28,9 +28,10 @@ import { reasonableTechPlugin } from "../../src/plugin.js";
 // reasonableTechPlugin uses @typescript-eslint/utils RuleModule types which are structurally
 // compatible with ESLint's Plugin type at runtime but differ in strict type checking.
 // Assert once here, matching the pattern used for tseslint.parser and tseslint.plugin above.
-const reasonableTechEslintPlugin = reasonableTechPlugin as unknown as NonNullable<
-  Linter.Config["plugins"]
->[string];
+const reasonableTechEslintPlugin =
+  reasonableTechPlugin as unknown as NonNullable<
+    Linter.Config["plugins"]
+  >[string];
 
 // tseslint.parser / tseslint.plugin use deliberately loose types
 // (LooseParserModule / FlatConfig.Plugin) to avoid circular type dependencies.
@@ -46,6 +47,7 @@ import {
   errorMessageEqualityViolation,
   errorMessageStartsWithViolation,
   errorMessageRegexViolation,
+  errorMessageRegexTestViolation,
   errorCodeCheckCorrect,
   instanceofCheckCorrect,
 } from "../fixtures/code-samples/error-handling/message-parsing.js";
@@ -90,6 +92,8 @@ import {
   newInConstructorViolation,
   injectedDependencyCorrect,
   factoryFunctionCorrect,
+  builtinNewInConstructorCorrect,
+  defaultParamNewInConstructorCorrect,
 } from "../fixtures/code-samples/architecture/dependency-injection.js";
 
 import {
@@ -180,6 +184,20 @@ describe("Custom Rules Integration Tests", () => {
           m.message.includes("error.message") ||
           m.message.includes("parse error messages") ||
           m.message.includes(".match()"),
+      );
+
+      expect(violation).toBeDefined();
+      expect(violation?.severity).toBe(2);
+    });
+
+    it("should catch /regex/.test(error.message) violations", () => {
+      const messages = linter.verify(errorMessageRegexTestViolation, config);
+
+      const violation = messages.find(
+        (m) =>
+          m.message.includes("regex") ||
+          m.message.includes("error.message") ||
+          m.message.includes("error detection"),
       );
 
       expect(violation).toBeDefined();
@@ -570,10 +588,18 @@ describe("Custom Rules Integration Tests", () => {
 
   describe("Dependency Injection Rules", () => {
     const linter = new Linter();
-    const rules = createDependencyInjectionRules();
 
     const config: Linter.Config = {
-      rules,
+      plugins: {
+        "@reasonabletech": {
+          rules: {
+            "no-constructor-instantiation": noConstructorInstantiationRule,
+          },
+        } as unknown as NonNullable<Linter.Config["plugins"]>[string],
+      },
+      rules: {
+        ...createDependencyInjectionRules(),
+      },
       languageOptions: {
         parser: typescriptParser,
         ecmaVersion: 2022,
@@ -615,6 +641,23 @@ describe("Custom Rules Integration Tests", () => {
 
     it("should allow standalone factory functions", () => {
       const messages = linter.verify(factoryFunctionCorrect, config);
+
+      const violations = messages.filter((m) => m.severity === 2);
+      expect(violations).toHaveLength(0);
+    });
+
+    it("should allow built-in constructors inside constructor", () => {
+      const messages = linter.verify(builtinNewInConstructorCorrect, config);
+
+      const violations = messages.filter((m) => m.severity === 2);
+      expect(violations).toHaveLength(0);
+    });
+
+    it("should allow new expressions in default parameter values", () => {
+      const messages = linter.verify(
+        defaultParamNewInConstructorCorrect,
+        config,
+      );
 
       const violations = messages.filter((m) => m.severity === 2);
       expect(violations).toHaveLength(0);

@@ -14,6 +14,36 @@ import type { Linter } from "eslint";
 import { mergeRuleConfigurations } from "./utils.js";
 
 /**
+ * Built-in constructor names that are safe to use inside constructors
+ *
+ * These are standard JavaScript/Web API data structures and value types
+ * that do not represent service dependencies and therefore do not need
+ * to be injected.
+ */
+const BUILTIN_CONSTRUCTORS = new Set([
+  "Map",
+  "Set",
+  "Date",
+  "Error",
+  "URL",
+  "RegExp",
+  "WeakMap",
+  "WeakSet",
+  "Promise",
+  "Array",
+  "Object",
+  "Headers",
+  "Request",
+  "Response",
+  "FormData",
+  "Blob",
+  "AbortController",
+  "URLSearchParams",
+  "TextEncoder",
+  "TextDecoder",
+]);
+
+/**
  * Configuration options for architecture pattern rules
  */
 export interface ArchitecturePatternRuleOptions {
@@ -42,7 +72,10 @@ const DEFAULT_OPTIONS: Required<ArchitecturePatternRuleOptions> = {
  * parameters, not wrapped in objects. This makes dependencies explicit, improves
  * testability, and prevents tight coupling.
  *
- * ❌ FORBIDDEN (ANY "*Dependencies" bundling):
+ * Detection is naming-based: interfaces and type aliases whose names end with
+ * "Dependencies" or "Deps" are flagged regardless of their contents.
+ *
+ * ❌ FORBIDDEN (ANY "*Dependencies" or "*Deps" naming):
  * ```typescript
  * // Wrong: Even ONE service wrapped is bad
  * interface AuthDependencies {
@@ -53,13 +86,13 @@ const DEFAULT_OPTIONS: Required<ArchitecturePatternRuleOptions> = {
  * }
  *
  * // Wrong: Multiple services bundled
- * interface ServiceDependencies {
+ * interface ServiceDeps {
  *   logger: Logger;
  *   database: Database;
  *   cache: Cache;
  * }
  * class MyService {
- *   constructor(private deps: ServiceDependencies) {
+ *   constructor(private deps: ServiceDeps) {
  *     // Tight coupling to the bundle structure
  *   }
  * }
@@ -123,88 +156,12 @@ export const noDependencyBundlingRule = ESLintUtils.RuleCreator(
     },
   ],
   create(context) {
-    /**
-     * Detects if a property type looks like a service instance (not configuration data)
-     * @param property - AST node representing a type element
-     * @returns True if the property type appears to be a service instance
-     */
-    function isServiceLikeProperty(property: TSESTree.TypeElement): boolean {
-      if (
-        property.type !== AST_NODE_TYPES.TSPropertySignature ||
-        property.typeAnnotation === undefined
-      ) {
-        return false;
-      }
-
-      const typeAnnotation = property.typeAnnotation.typeAnnotation;
-
-      // Check for type references (class/interface instances, not primitives)
-      if (typeAnnotation.type === AST_NODE_TYPES.TSTypeReference) {
-        const typeName = typeAnnotation.typeName;
-
-        if (typeName.type === AST_NODE_TYPES.Identifier) {
-          const name = typeName.name;
-
-          // PascalCase type = likely a class/service instance
-          // Exclude common utility types and primitives
-          const utilityTypes = new Set([
-            "String",
-            "Number",
-            "Boolean",
-            "Date",
-            "RegExp",
-            "Array",
-            "Promise",
-            "Record",
-            "Partial",
-            "Required",
-            "Readonly",
-            "Pick",
-            "Omit",
-            "Exclude",
-            "Extract",
-            "NonNullable",
-            "ReturnType",
-            "Parameters",
-            "Map",
-            "Set",
-            "WeakMap",
-            "WeakSet",
-          ]);
-
-          if (
-            name.startsWith(name[0].toUpperCase()) &&
-            !utilityTypes.has(name)
-          ) {
-            return true;
-          }
-        }
-      }
-
-      return false;
-    }
-
     return {
       TSInterfaceDeclaration(node): void {
         const name = node.id.name;
 
-        // 1. STRONG CHECK: Obvious naming patterns
+        // Naming-based check: interfaces ending with "Dependencies" or "Deps"
         if (name.endsWith("Dependencies") || name.endsWith("Deps")) {
-          context.report({
-            node: node.id,
-            messageId: "dependencyBundle",
-            data: { name },
-          });
-          return;
-        }
-
-        // 2. STRUCTURAL CHECK: Detect service bundling regardless of name
-        // If interface has 3+ service-like properties, likely a dependency bundle
-        const serviceLikeProperties = node.body.body.filter(
-          isServiceLikeProperty,
-        );
-
-        if (serviceLikeProperties.length >= 3) {
           context.report({
             node: node.id,
             messageId: "dependencyBundle",
@@ -230,11 +187,105 @@ export const noDependencyBundlingRule = ESLintUtils.RuleCreator(
 });
 
 /**
+ * Custom ESLint rule that prevents creating service dependencies inside constructors
+ *
+ * This rule detects `new PascalCase()` expressions inside class constructors and
+ * reports them as violations, since services should receive dependencies via
+ * constructor parameters rather than creating them internally.
+ *
+ * **Exceptions**:
+ * - Built-in constructors (Map, Set, Date, Error, etc.) are allowed because
+ *   they are standard data structures, not service dependencies.
+ * - `new` expressions inside default parameter values (AssignmentPattern) are
+ *   allowed because the dependency CAN still be injected — the `new` only runs
+ *   when no argument is provided.
+ * @example
+ * ```typescript
+ * // ❌ FORBIDDEN: creating a dependency inside a constructor
+ * class UserService {
+ *   constructor(config: Config) {
+ *     this.db = new Database(config); // Violation
+ *   }
+ * }
+ *
+ * // ✅ CORRECT: built-in constructors are fine
+ * class CacheService {
+ *   constructor() {
+ *     this.cache = new Map();
+ *   }
+ * }
+ *
+ * // ✅ CORRECT: default parameter values are fine
+ * class UserService {
+ *   constructor(private db: Database = new Database()) {}
+ * }
+ * ```
+ */
+export const noConstructorInstantiationRule = ESLintUtils.RuleCreator(
+  () => "docs/standards/architecture-principles.md",
+)({
+  name: "no-constructor-instantiation",
+  meta: {
+    type: "problem",
+    docs: {
+      description:
+        "Prevents creating service dependencies inside constructors instead of injecting them",
+    },
+    messages: {
+      constructorInstantiation:
+        "Services should not create dependencies in constructor. Inject them via constructor parameters instead. Use default parameter values (e.g., `db: Database = new Database()`) if you need a default implementation.",
+    },
+    schema: [],
+  },
+  defaultOptions: [],
+  create(context) {
+    return {
+      NewExpression(node): void {
+        const ancestors = context.sourceCode.getAncestors(node);
+
+        // Check if we are inside a constructor MethodDefinition
+        const constructorIndex = ancestors.findIndex(
+          (ancestor): ancestor is TSESTree.MethodDefinition =>
+            ancestor.type === AST_NODE_TYPES.MethodDefinition &&
+            ancestor.kind === "constructor",
+        );
+
+        if (constructorIndex === -1) {
+          return;
+        }
+
+        // Check if the callee is a built-in constructor
+        if (
+          node.callee.type === AST_NODE_TYPES.Identifier &&
+          BUILTIN_CONSTRUCTORS.has(node.callee.name)
+        ) {
+          return;
+        }
+
+        // Check if the NewExpression is inside an AssignmentPattern (default param)
+        const ancestorsAfterConstructor = ancestors.slice(constructorIndex + 1);
+        const isInDefaultParam = ancestorsAfterConstructor.some(
+          (ancestor) => ancestor.type === AST_NODE_TYPES.AssignmentPattern,
+        );
+
+        if (isInDefaultParam) {
+          return;
+        }
+
+        context.report({
+          node,
+          messageId: "constructorInstantiation",
+        });
+      },
+    };
+  },
+});
+
+/**
  * Creates rules that prevent wrapping service dependencies in container objects
  *
- * Uses the `@reasonabletech/no-dependency-bundling` custom rule which detects both
- * naming patterns (*Dependencies, *Deps) and structural bundling (3+ service-like
- * properties).
+ * Uses the `@reasonabletech/no-dependency-bundling` custom rule which detects
+ * naming patterns (*Dependencies, *Deps) on interfaces and type aliases.
  * @param options Configuration options for architecture pattern rules
  * @returns ESLint rules that prevent dependency bundling
  */
@@ -262,6 +313,11 @@ export function createDependencyBundlingRules(
  *
  * These rules prevent services from creating their own dependencies
  * or using singleton patterns, enforcing proper dependency injection.
+ *
+ * Uses `no-restricted-syntax` to ban `getInstance()` singletons and the
+ * `@reasonabletech/no-constructor-instantiation` custom rule to detect
+ * `new` expressions inside constructors (with built-in and default-param
+ * exceptions).
  *
  * ❌ FORBIDDEN:
  * ```typescript
@@ -296,12 +352,8 @@ export function createDependencyInjectionRules(
         selector: "MethodDefinition[static=true][key.name='getInstance']",
         message: `❌ FORBIDDEN: Never use singleton pattern with getInstance(). Use dependency injection instead.`,
       },
-      {
-        selector:
-          "MethodDefinition[kind='constructor'] NewExpression[callee.name=/^[A-Z]/]",
-        message: `❌ FORBIDDEN: Services should not create dependencies in constructor. Inject them via constructor parameters instead.`,
-      },
     ],
+    "@reasonabletech/no-constructor-instantiation": "error",
   };
 }
 

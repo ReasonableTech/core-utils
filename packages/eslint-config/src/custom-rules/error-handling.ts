@@ -128,8 +128,9 @@ export const noErrorMessageParsingRule = ESLintUtils.RuleCreator(
         // and the first argument is a `.message` member expression
         if (
           methodName === "test" &&
-          callee.object.type === AST_NODE_TYPES.MemberExpression &&
-          isMessageAccess(callee.object)
+          node.arguments.length > 0 &&
+          node.arguments[0].type === AST_NODE_TYPES.MemberExpression &&
+          isMessageAccess(node.arguments[0])
         ) {
           context.report({ node, messageId: "regexTest" });
         }

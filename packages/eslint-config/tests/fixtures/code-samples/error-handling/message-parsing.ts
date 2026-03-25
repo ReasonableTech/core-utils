@@ -77,6 +77,23 @@ try {
 `;
 
 /**
+ * Error message parsing violation using regex .test() method.
+ *
+ * This pattern is forbidden because regex testing on error messages is still
+ * unreliable. Error messages can change wording entirely while keeping the same
+ * error code, breaking regex patterns. Use error.code or instanceof instead.
+ */
+export const errorMessageRegexTestViolation = `
+try {
+  await fetch("/api/data");
+} catch (error) {
+  if (/timeout/i.test(error.message)) {
+    console.log("Timeout occurred");
+  }
+}
+`;
+
+/**
  * Correct error detection using structured properties.
  *
  * This pattern uses error.code (string error codes like ECONNREFUSED) and

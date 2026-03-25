@@ -65,3 +65,32 @@ function createService(db, logger) {
   return { db, logger };
 }
 `;
+
+/**
+ * Correct: using built-in constructors inside a constructor
+ *
+ * Built-in types like Map, Set, Date are not service dependencies —
+ * they are standard data structures and value types that don't need injection.
+ */
+export const builtinNewInConstructorCorrect = `
+class CacheService {
+  constructor() {
+    this.cache = new Map();
+    this.timestamps = new Set();
+    this.createdAt = new Date();
+  }
+}
+`;
+
+/**
+ * Correct: default parameter value with new expression
+ *
+ * Default parameter values are fine because the dependency CAN still be
+ * injected — the new expression only runs when no argument is provided.
+ * This is the recommended pattern for optional dependencies.
+ */
+export const defaultParamNewInConstructorCorrect = `
+class UserService {
+  constructor(private db: Database = new Database()) {}
+}
+`;
