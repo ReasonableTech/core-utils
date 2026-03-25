@@ -48,6 +48,8 @@ Create a changeset when your changes affect a published package:
 pnpm changeset
 ```
 
+See [Writing Changeset Content](./docs/tooling.md#writing-changeset-content) for how to structure the changeset body. The first line is the consumer-facing summary; detail goes below.
+
 Commit the generated `.changeset/` file with your PR.
 
 ## Commit Conventions

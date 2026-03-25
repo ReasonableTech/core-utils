@@ -94,6 +94,59 @@ Key points:
 - `minor`: New features, non-breaking additions
 - `major`: Breaking changes (linked packages bump together)
 
+### Writing Changeset Content
+
+Changeset bodies appear directly in the published CHANGELOG and GitHub Release notes. The release pipeline produces a two-part entry for each package: your human-written prose on top, and an auto-generated `### Commits` section appended underneath listing every scoped commit subject. See [releasing.md](./internal/releasing.md#manual-changelogs-recommended-for-significant-releases) for the full release pipeline context.
+
+The `@changesets/changelog-github` generator renders the body as follows:
+
+- The **first line** becomes a top-level bullet item, prefixed with auto-generated PR/commit/author links
+- All **subsequent lines** are indented under that bullet
+- The auto-generated `### Commits` section is appended by the release pipeline — you don't write it
+
+This means the first line is what consumers see when scanning the changelog. Write it as a clear, standalone summary sentence.
+
+#### Template
+
+```markdown
+---
+"@reasonabletech/package-name": minor
+---
+
+One-sentence summary of what changed and why.
+
+#### Breaking changes
+
+- What broke and what to do about it.
+
+#### New features
+
+- What's new and how to use it.
+
+#### Bug fixes
+
+- What was wrong and what's fixed now.
+```
+
+Only include sections that apply. A patch with one bug fix needs just the summary line and a sentence or two of detail — not three empty headers.
+
+#### Rules
+
+1. **First line is the summary.** It should make sense on its own — this is the text that appears next to the PR link in the changelog. Don't start with a heading or bullet.
+2. **Use `####` (h4) for section headers.** The changelog generator places content under an auto-generated `###` heading (`### Minor Changes`), so h4 nests correctly.
+3. **Lead with breaking changes.** If there are breaking changes, they come first with explicit migration steps. Consumers need to know what to do before they upgrade.
+4. **Write for the consumer.** Internal implementation details (utility function refactors, test reorganization) don't belong here. Describe what changed from the user's perspective.
+5. **Include migration steps.** Don't just say "removed X" — say what to use instead.
+6. **Don't list commits.** The release pipeline appends a `### Commits` section automatically. Your job is the narrative, not the log.
+
+#### When to create a changeset
+
+- ✅ New features, bug fixes, breaking changes to published packages
+- ✅ Documentation changes that ship with a package
+- ❌ Internal tooling, CI changes, or dev-only updates
+
+For auto-generated changelogs (no manual changeset), the pipeline creates one from commit subjects. **Write a manual changeset for any release involving new public API, breaking changes, or functionality worth explaining.** See [releasing.md](./internal/releasing.md) for details.
+
 ---
 
 ## Commitlint
@@ -120,30 +173,34 @@ Defined in `commitlint.config.js`:
 export default {
   extends: ["@commitlint/config-conventional"],
   rules: {
-    "scope-enum": [2, "always", [
-      "config-typescript",
-      "config-tsup",
-      "config-vitest",
-      "eslint-config",
-      "config-playwright",
-      "utils",
-      "repo",
-    ]],
+    "scope-enum": [
+      2,
+      "always",
+      [
+        "config-typescript",
+        "config-tsup",
+        "config-vitest",
+        "eslint-config",
+        "config-playwright",
+        "utils",
+        "repo",
+      ],
+    ],
   },
 };
 ```
 
 ### Allowed Scopes
 
-| Scope | Use For |
-|-------|---------|
+| Scope               | Use For                   |
+| ------------------- | ------------------------- |
 | `config-typescript` | TypeScript preset changes |
-| `config-tsup` | tsup config changes |
-| `config-vitest` | Vitest config changes |
-| `eslint-config` | ESLint config changes |
+| `config-tsup`       | tsup config changes       |
+| `config-vitest`     | Vitest config changes     |
+| `eslint-config`     | ESLint config changes     |
 | `config-playwright` | Playwright config changes |
-| `utils` | Runtime utilities changes |
-| `repo` | Monorepo-wide changes |
+| `utils`             | Runtime utilities changes |
+| `repo`              | Monorepo-wide changes     |
 
 Omit scope for general changes that span multiple packages.
 

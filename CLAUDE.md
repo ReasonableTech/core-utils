@@ -37,6 +37,14 @@ pnpm --filter=@reasonabletech/<package> test
 pnpm --filter=@reasonabletech/<package> typecheck
 ```
 
+## Changeset Discipline
+
+Create a changeset (`pnpm changeset`) when changes affect a published package. Skip for internal tooling, CI, or dev-only changes.
+
+The **first line** of the changeset body is the consumer-facing summary — it becomes the bullet text in the CHANGELOG alongside auto-generated PR/commit links. Write it as a clear sentence, not a heading or bullet. Structured detail (breaking changes, migration steps, new features) goes below using `####` headers.
+
+See [Writing Changeset Content](./docs/tooling.md#writing-changeset-content) for the full format standard.
+
 ## Detailed Standards
 
 This file covers principles. For detailed reference, see:
