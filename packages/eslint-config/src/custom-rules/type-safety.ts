@@ -11,7 +11,6 @@ import {
   type TSESTree,
 } from "@typescript-eslint/utils";
 import type { Linter } from "eslint";
-import { mergeRuleConfigurations } from "./utils.js";
 
 /**
  * Configuration options for type safety rules
@@ -130,38 +129,6 @@ export function createNoAnyRules(
 }
 
 /**
- * Creates rules for safe Result type handling
- *
- * These rules prevent unsafe access to Result type data properties
- * without proper success checking.
- *
- * ❌ FORBIDDEN:
- * ```typescript
- * const result = await fetchUser(id);
- * return result.data; // Unsafe - no success check
- * ```
- *
- * ✅ CORRECT:
- * ```typescript
- * const result = await fetchUser(id);
- * if (!result.success) {
- *   return result; // Propagate error
- * }
- * return ok(result.data); // Safe access after check
- * ```
- * @param _options Configuration options (reserved for future use)
- * @returns ESLint rules for Result type safety
- */
-export function createResultTypeRules(
-  _options: TypeSafetyRuleOptions = {},
-): Linter.RulesRecord {
-  // Note: Full control-flow analysis for Result types is beyond ESLint's capabilities.
-  // This rule uses heuristics to catch common unsafe patterns.
-  // For complete safety, rely on TypeScript's type system and code review.
-  return {};
-}
-
-/**
  * Creates a complete set of type safety rules
  *
  * This is the main function that combines all type safety rules
@@ -172,10 +139,7 @@ export function createResultTypeRules(
 export function createTypeSafetyRules(
   options: TypeSafetyRuleOptions = {},
 ): Linter.RulesRecord {
-  const noAnyRules = createNoAnyRules(options);
-  const resultTypeRules = createResultTypeRules(options);
-
-  return mergeRuleConfigurations(noAnyRules, resultTypeRules);
+  return createNoAnyRules(options);
 }
 
 /**

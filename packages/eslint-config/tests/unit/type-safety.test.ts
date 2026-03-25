@@ -9,7 +9,6 @@
 import { describe, it, expect } from "vitest";
 import {
   createNoAnyRules,
-  createResultTypeRules,
   createTypeSafetyRules,
   createPlatformTypeSafetyRules,
 } from "../../src/custom-rules/type-safety.js";
@@ -39,23 +38,6 @@ describe("createTypeSafetyRules", () => {
 
     expect(rules).toBeDefined();
     expect(Object.keys(rules).length).toBeGreaterThan(0);
-  });
-});
-
-describe("createResultTypeRules", () => {
-  it("should return a valid rule configuration", () => {
-    const rules = createResultTypeRules();
-
-    expect(rules).toBeDefined();
-  });
-
-  it("should accept custom configuration", () => {
-    const rules = createResultTypeRules({
-      docBaseUrl: "custom/docs/results.md",
-      allowInTests: true,
-    });
-
-    expect(rules).toBeDefined();
   });
 });
 
