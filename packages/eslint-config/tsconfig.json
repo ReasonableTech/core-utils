@@ -6,6 +6,7 @@
     "outDir": "dist",
     "rootDirs": ["src"],
     "emitDeclarationOnly": false,
-    "rootDir": "."
+    "rootDir": ".",
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo"
   }
 }

@@ -37,7 +37,7 @@
     }
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -p tsconfig.build.json",
     "clean": "rimraf dist .turbo node_modules coverage .next .webpack out && rm -f tsconfig.tsbuildinfo",
     "dev": "tsc --watch",
     "docs:coverage": "tsx ../../../scripts/analysis/check-doc-coverage.ts --html",
@@ -111,7 +111,8 @@
   "homepage": "https://github.com/ReasonableTech/core-utils/tree/main/packages/eslint-config",
   "files": [
     "dist",
-    "docs/**/*",
+    "!dist/**/*.map",
+    "!dist/**/*.tsbuildinfo",
     "README.md",
     "CHANGELOG.md"
   ],
