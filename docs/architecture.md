@@ -25,7 +25,7 @@ core-utils/
 
 ### Config Packages
 
-The config packages are **linked** for versioning—when one gets a major bump, they all do. This ensures consumers can depend on compatible versions across the stack.
+The config packages share build-time dependencies but are **versioned independently**. CI catches cross-package breaks before release.
 
 ```
 config-typescript ←── config-tsup (uses tsconfig presets)
@@ -47,7 +47,6 @@ Within the monorepo, packages have build-time dependencies:
 `@reasonabletech/utils` is a **runtime** package (not a config package). It:
 
 - Has no dependencies on config packages
-- Is NOT linked with config packages for versioning
 - Provides utilities like Result types, retry helpers, datetime functions
 
 ## Workspace Configuration
@@ -115,6 +114,5 @@ See [New Package Checklist](./templates/NEW_PACKAGE_CHECKLIST.md) for the comple
 Key steps:
 
 1. Create `packages/new-package/` with standard structure
-2. Add to `.changeset/config.json` linked packages (if config package)
-3. Update root `README.md` package index
-4. Run `pnpm install` to link workspace
+2. Update root `README.md` package index
+3. Run `pnpm install` to link workspace

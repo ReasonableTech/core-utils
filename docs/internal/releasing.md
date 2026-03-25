@@ -19,7 +19,7 @@ lint → typecheck → test → build → verify:release
 
 ### Auto-generated changelogs
 
-By default, the pipeline generates a changeset automatically from Conventional Commits scoped to each package. Each package's changelog entry lists only the commit subjects directly relevant to it. Packages bumped transitively (via the linked release group) get a note naming the packages that drove the bump.
+By default, the pipeline generates a changeset automatically from Conventional Commits scoped to each package. Each package's changelog entry lists only the commit subjects directly relevant to it.
 
 For example, a push containing:
 
@@ -48,7 +48,7 @@ To write a manual changeset:
 
 3. Write the changelog body below the frontmatter. This text will appear verbatim in `CHANGELOG.md` and in the GitHub Release notes:
 
-   ```md
+   ````md
    ---
    "@reasonabletech/utils": minor
    ---
@@ -64,6 +64,10 @@ To write a manual changeset:
    deepMerge({ a: { x: 1 } }, { a: { y: 2 } });
    // → { a: { x: 1, y: 2 } }
    ```
+   ````
+
+   ```
+
    ```
 
 4. Commit the `.changeset/*.md` file together with your code changes and push.
@@ -86,9 +90,7 @@ The release job blocks publishing unless all of the following pass:
 
 ## Versioning
 
-All packages except `@reasonabletech/utils` are in a **linked release group** — they always share the same version number. If any one of them is bumped, all are bumped to the highest level among them.
-
-`@reasonabletech/utils` is versioned independently.
+All packages are **versioned independently**. Each package is bumped only when it has its own changes. CI catches cross-package build breaks before release.
 
 ## Required Repository Configuration
 

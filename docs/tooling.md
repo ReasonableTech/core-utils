@@ -73,10 +73,11 @@ Defined in `.changeset/config.json`:
 
 ```json
 {
-  "changelog": ["@changesets/changelog-github", { "repo": "ReasonableTech/core-utils" }],
-  "linked": [
-    ["@reasonabletech/eslint-config", "@reasonabletech/config-typescript", ...]
+  "changelog": [
+    "@changesets/changelog-github",
+    { "repo": "ReasonableTech/core-utils" }
   ],
+  "linked": [],
   "access": "public",
   "baseBranch": "main"
 }
@@ -84,7 +85,7 @@ Defined in `.changeset/config.json`:
 
 Key points:
 
-- **Linked packages**: Config packages version together. A major bump to one bumps all.
+- **Independent versioning**: Each package is versioned independently. No linked release groups.
 - **Public access**: Packages publish to npm public registry.
 - **GitHub changelog**: Changelogs include PR links and contributor attribution.
 
@@ -92,7 +93,7 @@ Key points:
 
 - `patch`: Bug fixes, documentation
 - `minor`: New features, non-breaking additions
-- `major`: Breaking changes (linked packages bump together)
+- `major`: Breaking changes
 
 ### Writing Changeset Content
 

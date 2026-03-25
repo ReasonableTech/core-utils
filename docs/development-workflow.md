@@ -94,7 +94,7 @@ pnpm changeset
 | New feature, non-breaking addition | `minor` |
 | Breaking change                    | `major` |
 
-**Important:** The config packages (`config-typescript`, `config-tsup`, `config-vitest`, `eslint-config`, `config-playwright`) are [linked](./tooling.md#changesets) — a major bump to one bumps all of them. `@reasonabletech/utils` versions independently.
+All packages are versioned independently. See [Writing Changeset Content](./tooling.md#writing-changeset-content) for how to structure the changeset body.
 
 Commit the generated `.changeset/` file with your change.
 

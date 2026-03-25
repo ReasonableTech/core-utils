@@ -6,15 +6,7 @@
   ],
   "commit": false,
   "fixed": [],
-  "linked": [
-    [
-      "@reasonabletech/eslint-config",
-      "@reasonabletech/config-typescript",
-      "@reasonabletech/config-tsup",
-      "@reasonabletech/config-vitest",
-      "@reasonabletech/config-playwright"
-    ]
-  ],
+  "linked": [],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
