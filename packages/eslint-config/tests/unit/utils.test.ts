@@ -73,9 +73,30 @@ describe("mergeRuleConfigurations", () => {
     const result = mergeRuleConfigurations(config);
 
     expect(result["no-restricted-syntax"]).toEqual([
-      "error",
+      "warn",
       { selector: "DebuggerStatement", message: "No debugger" },
     ]);
+  });
+
+  it("should escalate to error when any input uses error severity", () => {
+    const warnConfig: Linter.RulesRecord = {
+      "no-restricted-syntax": [
+        "warn",
+        { selector: "WithStatement", message: "No with" },
+      ],
+    };
+    const errorConfig: Linter.RulesRecord = {
+      "no-restricted-syntax": [
+        "error",
+        { selector: "DebuggerStatement", message: "No debugger" },
+      ],
+    };
+
+    const result = mergeRuleConfigurations(warnConfig, errorConfig);
+
+    const patterns = result["no-restricted-syntax"];
+    expect(Array.isArray(patterns)).toBe(true);
+    expect((patterns as unknown[])[0]).toBe("error");
   });
 
   it("should ignore no-restricted-syntax with non-error/non-warn level", () => {

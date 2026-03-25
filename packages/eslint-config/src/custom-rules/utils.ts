@@ -33,6 +33,7 @@ export function mergeRuleConfigurations(
     selector: string;
     message: string;
   }> = [];
+  let highestSeverity: "warn" | "error" = "warn";
 
   for (const config of ruleConfigs) {
     for (const [ruleName, ruleConfig] of Object.entries(config)) {
@@ -40,6 +41,9 @@ export function mergeRuleConfigurations(
         // Extract patterns from no-restricted-syntax rules
         const [level, ...patterns] = ruleConfig;
         if (level === "error" || level === "warn") {
+          if (level === "error") {
+            highestSeverity = "error";
+          }
           restrictedSyntaxPatterns.push(
             ...(patterns as Array<{ selector: string; message: string }>),
           );
@@ -59,7 +63,7 @@ export function mergeRuleConfigurations(
 
   // Add the merged no-restricted-syntax rule if we have patterns
   if (deduplicatedPatterns.length > 0) {
-    merged["no-restricted-syntax"] = ["error", ...deduplicatedPatterns];
+    merged["no-restricted-syntax"] = [highestSeverity, ...deduplicatedPatterns];
   }
 
   return merged;
