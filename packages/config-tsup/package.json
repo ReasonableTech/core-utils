@@ -26,6 +26,7 @@
     "dist",
     "!dist/**/*.map",
     "!dist/**/*.tsbuildinfo",
+    "docs/**/*",
     "README.md",
     "CHANGELOG.md"
   ],
