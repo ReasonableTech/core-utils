@@ -1,5 +1,11 @@
 # @reasonabletech/eslint-config
 
+## 0.2.1
+
+### Patch Changes
+
+- - Automated release.
+
 ## 0.2.0
 
 ### Minor Changes

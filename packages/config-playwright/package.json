@@ -1,6 +1,6 @@
 {
   "name": "@reasonabletech/config-playwright",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shared Playwright configuration for E2E testing",
   "keywords": [
     "reasonabletech",

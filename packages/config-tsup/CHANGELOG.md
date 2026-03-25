@@ -1,5 +1,11 @@
 # @reasonabletech/config-tsup
 
+## 0.1.2
+
+### Patch Changes
+
+- - Automated release.
+
 ## 0.1.1
 
 ### Patch Changes

@@ -1,6 +1,6 @@
 {
   "name": "@reasonabletech/config-vitest",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shared Vitest configuration",
   "keywords": [
     "reasonabletech",
