@@ -5,7 +5,11 @@
  * that bypass code quality tools or create maintainability issues.
  */
 
-import { ESLintUtils, type TSESLint, type TSESTree } from "@typescript-eslint/utils";
+import {
+  ESLintUtils,
+  type TSESLint,
+  type TSESTree,
+} from "@typescript-eslint/utils";
 import type { Linter } from "eslint";
 import { mergeRuleConfigurations } from "./utils.js";
 
@@ -66,9 +70,10 @@ export const noLinterDisablingRule = ESLintUtils.RuleCreator(
   name: "no-linter-disabling",
   meta: {
     type: "problem",
+    deprecated: true,
     docs: {
       description:
-        "Prevents disabling linter rules without proper justification",
+        "Prevents disabling linter rules without proper justification. Deprecated: use ESLint's built-in reportUnusedDisableDirectives and the native -- reason syntax instead.",
     },
     messages: {
       noDisable:
@@ -98,15 +103,19 @@ export const noLinterDisablingRule = ESLintUtils.RuleCreator(
       ...context.options[0],
     };
     const filename =
-      typeof (context as { getFilename?: () => string }).getFilename === "function"
+      typeof (context as { getFilename?: () => string }).getFilename ===
+      "function"
         ? (context as { getFilename: () => string }).getFilename()
         : ((context as { filename?: string }).filename ?? "<input>");
 
     const sourceCode: TSESLint.SourceCode | null =
       typeof (context as { getSourceCode?: () => TSESLint.SourceCode })
         .getSourceCode === "function"
-        ? (context as { getSourceCode: () => TSESLint.SourceCode }).getSourceCode()
-        : ((context as { sourceCode?: TSESLint.SourceCode }).sourceCode ?? null);
+        ? (
+            context as { getSourceCode: () => TSESLint.SourceCode }
+          ).getSourceCode()
+        : ((context as { sourceCode?: TSESLint.SourceCode }).sourceCode ??
+          null);
 
     if (sourceCode == null) {
       return {};
@@ -298,13 +307,9 @@ export const noBarrelExportsRule = ESLintUtils.RuleCreator(
  * // Or use explicit named exports
  * export { UserService, type CreateUserError } from "./user-service";
  * ```
- * @param _options Configuration options (currently unused, reserved for future)
- * @param _options.allowedPatterns Glob patterns for files where barrel exports are allowed
  * @returns ESLint rules that prevent barrel exports
  */
-export function createBarrelExportRules(
-  _options: { allowedPatterns?: string[] } = {},
-): Linter.RulesRecord {
+export function createBarrelExportRules(): Linter.RulesRecord {
   return {
     "@reasonabletech/no-barrel-exports": "error",
   };
@@ -351,40 +356,15 @@ export function createAsyncPatternRules(
  * Creates rules for enforcing code quality standards
  *
  * This function combines multiple code quality rules including:
- * - no-linter-disabling (prevents bypassing quality tools)
  * - no-barrel-exports (prevents bloated namespaces)
  * - async pattern consistency (prevents mixing await and .then())
- * @param options Configuration options for code quality rules
- * @param options.linterDisabling Configuration for the no-linter-disabling rule
- * @param options.barrelExports Configuration for barrel export prevention rules
- * @param options.barrelExports.allowedPatterns Glob patterns for files where barrel exports are allowed
  * @returns Complete set of code quality ESLint rules
  */
-export function createCodeQualityRules(
-  options: {
-    linterDisabling?: NoLinterDisablingOptions;
-    barrelExports?: { allowedPatterns?: string[] };
-  } = {},
-): Linter.RulesRecord {
-  const linterDisablingRules: Linter.RulesRecord = {
-    "@reasonabletech/no-linter-disabling": [
-      "error",
-      {
-        allowInTests: true,
-        requireJustification: true,
-        ...options.linterDisabling,
-      },
-    ] as Linter.RuleEntry,
-  };
-
-  const barrelExportRules = createBarrelExportRules(options.barrelExports);
+export function createCodeQualityRules(): Linter.RulesRecord {
+  const barrelExportRules = createBarrelExportRules();
   const asyncPatternRules = createAsyncPatternRules();
 
-  return mergeRuleConfigurations(
-    linterDisablingRules,
-    barrelExportRules,
-    asyncPatternRules,
-  );
+  return mergeRuleConfigurations(barrelExportRules, asyncPatternRules);
 }
 
 /**
@@ -421,10 +401,11 @@ export interface TerminologyOptions {
 export function createTerminologyRules(
   options: TerminologyOptions = {},
 ): Linter.RulesRecord {
-  const forbiddenTerms = options.forbiddenTerms ?? {
-    toolCall: "action",
-    tool_call: "action",
-  };
+  const forbiddenTerms = options.forbiddenTerms ?? {};
+
+  if (Object.keys(forbiddenTerms).length === 0) {
+    return {};
+  }
 
   const patterns = Object.entries(forbiddenTerms).map(
     ([forbidden, required]) => ({
@@ -503,12 +484,5 @@ export function createMagicNumbersRules(
  * @returns ESLint rules configured for platform projects
  */
 export function createPlatformCodeQualityRules(): Linter.RulesRecord {
-  return createCodeQualityRules({
-    linterDisabling: {
-      allowInTests: true,
-      requireJustification: true,
-      allowedRules: [],
-    },
-    barrelExports: {},
-  });
+  return createCodeQualityRules();
 }

@@ -32,26 +32,10 @@ describe("createCodeQualityRules", () => {
     expect(rules).toHaveProperty("@typescript-eslint/no-misused-promises");
   });
 
-  it("should configure no-linter-disabling rule", () => {
-    const rules = createCodeQualityRules({
-      linterDisabling: {
-        allowInTests: false,
-        requireJustification: false,
-      },
-    });
+  it("should not include deprecated no-linter-disabling rule", () => {
+    const rules = createCodeQualityRules();
 
-    expect(rules).toHaveProperty("@reasonabletech/no-linter-disabling");
-  });
-
-  it("should accept custom configuration for barrel exports", () => {
-    const rules = createCodeQualityRules({
-      barrelExports: {
-        allowedPatterns: ["**/index.ts"],
-      },
-    });
-
-    expect(rules).toBeDefined();
-    expect(Object.keys(rules).length).toBeGreaterThan(0);
+    expect(rules).not.toHaveProperty("@reasonabletech/no-linter-disabling");
   });
 });
 
@@ -85,13 +69,13 @@ describe("createPlatformCodeQualityRules", () => {
 });
 
 describe("createTerminologyRules", () => {
-  it("should produce a non-empty rule configuration", () => {
+  it("should return empty config when no terms provided", () => {
     const rules = createTerminologyRules();
 
-    expect(rules).toHaveProperty("no-restricted-syntax");
+    expect(Object.keys(rules)).toHaveLength(0);
   });
 
-  it("should accept custom forbidden terms", () => {
+  it("should produce rules when forbidden terms are provided", () => {
     const rules = createTerminologyRules({
       forbiddenTerms: {
         oldTerm: "newTerm",

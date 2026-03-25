@@ -6,12 +6,12 @@ Reusable ESLint rule configurations enforcing type safety, error handling, archi
 
 Four rules are registered as a proper ESLint plugin via `src/plugin.ts`. They appear in lint output as `@reasonabletech/rule-name` and are implemented with `ESLintUtils.RuleCreator` from `@typescript-eslint/utils`:
 
-| Plugin Rule                                | What It Catches                                             |
-| ------------------------------------------ | ----------------------------------------------------------- |
-| `@reasonabletech/no-dependency-bundling`   | God-object dependency patterns (`Dependencies` suffix)      |
-| `@reasonabletech/no-linter-disabling`      | Unjustified `eslint-disable` comments                       |
-| `@reasonabletech/no-null-undefined-checks` | Null/undefined checks that don't match declared types       |
-| `@reasonabletech/use-result-helpers`       | Manual Result object construction instead of `ok()`/`err()` |
+| Plugin Rule                                | What It Catches                                                                              |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `@reasonabletech/no-dependency-bundling`   | God-object dependency patterns (`Dependencies` suffix)                                       |
+| ~~`@reasonabletech/no-linter-disabling`~~  | **Deprecated.** Use ESLint's `reportUnusedDisableDirectives` and `-- reason` syntax instead. |
+| `@reasonabletech/no-null-undefined-checks` | Null/undefined checks that don't match declared types                                        |
+| `@reasonabletech/use-result-helpers`       | Manual Result object construction instead of `ok()`/`err()`                                  |
 
 ## `no-restricted-syntax` Rules
 
@@ -23,7 +23,7 @@ Additional patterns are enforced via `no-restricted-syntax` AST selectors. These
 | **null-undefined-checks.ts** | `createNullUndefinedChecksRules()` | Match null/undefined checks to declared types (AST selector complement to plugin rule) |
 | **architecture-patterns.ts** | `createArchitecturePatternRules()` | No dependency god objects, no singletons, proper DI                                    |
 | **type-safety.ts**           | `createTypeSafetyRules()`          | No `as any` casts, no double casts through any                                         |
-| **code-quality.ts**          | `createCodeQualityRules()`         | No unjustified linter disabling, no `export *`, no mixed async patterns                |
+| **code-quality.ts**          | `createCodeQualityRules()`         | No `export *`, no mixed async patterns                                                 |
 | **platform-conventions.ts**  | `createPlatformConventionRules()`  | Use `ok()`/`err()` helpers with shared platform conventions                            |
 | **ui-library-imports.ts**    | `createUILibraryImportRules()`     | No `@lovelace-ai/ui` barrel imports; require subpath imports                           |
 | **test-quality.ts**          | `createNoTypeofInExpectRules()`    | No `typeof` in Vitest `expect()` assertions                                            |
@@ -76,7 +76,6 @@ const rules = createReasonableTechRules({
   errorHandling: { requireErrorTypeJSDoc: true },
   typeSafety: { allowInTests: false },
   codeQuality: {
-    linterDisabling: { requireJustification: true },
     barrelExports: {},
   },
 });

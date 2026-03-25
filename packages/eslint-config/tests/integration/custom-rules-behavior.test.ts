@@ -709,7 +709,9 @@ describe("Custom Rules Integration Tests", () => {
 
   describe("Terminology Rules", () => {
     const linter = new Linter();
-    const rules = createTerminologyRules();
+    const rules = createTerminologyRules({
+      forbiddenTerms: { toolCall: "action", tool_call: "action" },
+    });
 
     const config: Linter.Config = {
       rules,
