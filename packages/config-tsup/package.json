@@ -24,7 +24,10 @@
   },
   "files": [
     "dist",
-    "docs/**/*"
+    "!dist/**/*.map",
+    "!dist/**/*.tsbuildinfo",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "publishConfig": {
     "access": "public",

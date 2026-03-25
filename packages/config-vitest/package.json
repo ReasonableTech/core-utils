@@ -39,8 +39,10 @@
   },
   "files": [
     "dist",
-    "docs/**/*",
-    "src"
+    "!dist/**/*.map",
+    "!dist/**/*.tsbuildinfo",
+    "README.md",
+    "CHANGELOG.md"
   ],
   "scripts": {
     "build": "tsup && tsc --emitDeclarationOnly -p tsconfig.build.json",

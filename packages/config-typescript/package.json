@@ -14,8 +14,8 @@
   "type": "module",
   "files": [
     "lib/**/*.json",
-    "docs/**/*",
-    "examples/**/*"
+    "README.md",
+    "CHANGELOG.md"
   ],
   "exports": {
     "./base.json": "./lib/base.json",
